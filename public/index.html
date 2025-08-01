@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horoscope Survey - Data Collection POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .required {
+            color: #e53e3e;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .radio-group, .checkbox-group {
+            display: grid;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        
+        .radio-option.selected, .checkbox-option.selected {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+        
+        .radio-option input, .checkbox-option input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .data-richness {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .richness-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .richness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            width: 8.33%;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .output-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .json-output {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Cosmic Data Collector</h1>
+        <p class="subtitle">The more you share, the richer your cosmic reading becomes</p>
+        
+        <form id="horoscopeForm">
+            <!-- Required Field -->
+            <div class="form-group">
+                <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            </div>
+            
+            <!-- Optional Fields -->
+            <div class="form-group">
+                <label for="timeOfBirth">Time of Birth (for rising sign & houses)</label>
+                <input type="time" id="timeOfBirth" name="timeOfBirth">
+            </div>
+            
+            <div class="form-group">
+                <label for="birthplace">Birthplace (City, Country)</label>
+                <input type="text" id="birthplace" name="birthplace" placeholder="e.g., New York, USA">
+            </div>
+            
+            <div class="form-group">
+                <label for="currentLocation">Current Location</label>
+                <input type="text" id="currentLocation" name="currentLocation" placeholder="e.g., Los Angeles, USA">
+            </div>
+            
+            <div class="form-group">
+                <label for="sexAssigned">Sex Assigned at Birth (for medical astrology)</label>
+                <select id="sexAssigned" name="sexAssigned">
+                    <option value="">Prefer not to say</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="intersex">Intersex</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="genderIdentity">Gender Identity (for personalization)</label>
+                <input type="text" id="genderIdentity" name="genderIdentity" placeholder="e.g., she/her, he/him, they/them">
+            </div>
+            
+            <div class="form-group">
+                <label>Reading Length/Format</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'quick')">
+                        <input type="radio" name="lengthFormat" value="quick" id="quick">
+                        <label for="quick">Quick hit - what's happening TODAY?</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'twoWeeks')">
+                        <input type="radio" name="lengthFormat" value="twoWeeks" id="twoWeeks">
+                        <label for="twoWeeks">Next two weeks overview</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'detailed')">
+                        <input type="radio" name="lengthFormat" value="detailed" id="detailed">
+                        <label for="detailed">Long nerdy format - give me everything</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>💘 Current Heart Status</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'single')">
+                        <input type="radio" name="heartStatus" value="single" id="single">
+                        <label for="single">Single & thriving</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'crushing')">
+                        <input type="radio" name="heartStatus" value="crushing" id="crushing">
+                        <label for="crushing">Crushing in silence</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'situationship')">
+                        <input type="radio" name="heartStatus" value="situationship" id="situationship">
+                        <label for="situationship">It's a Situationship™</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'vibing')">
+                        <input type="radio" name="heartStatus" value="vibing" id="vibing">
+                        <label for="vibing">Just vibing (playin' the field)</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'partnered')">
+                        <input type="radio" name="heartStatus" value="partnered" id="partnered">
+                        <label for="partnered">Partnered (boo'd up)</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('heartStatus', 'married')">
+                        <input type="radio" name="heartStatus" value="married" id="married">
+                        <label for="married">Married (to a human... or the hustle)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Vibe Check - Today I need:</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'encouragement')">
+                        <input type="radio" name="vibeCheck" value="encouragement" id="encouragement">
+                        <label for="encouragement">🐝 A Buzz of Encouragement</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'fire')">
+                        <input type="radio" name="vibeCheck" value="fire" id="fire">
+                        <label for="fire">🔥 A Fire to Kick You into Gear</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'reflection')">
+                        <input type="radio" name="vibeCheck" value="reflection" id="reflection">
+                        <label for="reflection">🧘 A Soulful Reflection</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'sass')">
+                        <input type="radio" name="vibeCheck" value="sass" id="sass">
+                        <label for="sass">💅 A Cosmic Read with Sass</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Your Archetype</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio('archetype', 'cottagecore')">
+                        <input type="radio" name="archetype" value="cottagecore" id="cottagecore">
+                        <label for="cottagecore">Cottagecore Witch</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'tasmanian')">
+                        <input type="radio" name="archetype" value="tasmanian" id="tasmanian">
+                        <label for="tasmanian">Tasmanian Devil</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'corporate')">
+                        <input type="radio" name="archetype" value="corporate" id="corporate">
+                        <label for="corporate">Corporate Power Suit</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'rainbow')">
+                        <input type="radio" name="archetype" value="rainbow" id="rainbow">
+                        <label for="rainbow">Rainbow Manifestor</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'sadgirl')">
+                        <input type="radio" name="archetype" value="sadgirl" id="sadgirl">
+                        <label for="sadgirl">🥀 Sad Girl Oracle</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'nerd')">
+                        <input type="radio" name="archetype" value="nerd" id="nerd">
+                        <label for="nerd">Super Nerd</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'overwhelmed')">
+                        <input type="radio" name="archetype" value="overwhelmed" id="overwhelmed">
+                        <label for="overwhelmed">Circular Thinker, Over-Stressed - NEED HELP</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'anarchist')">
+                        <input type="radio" name="archetype" value="anarchist" id="anarchist">
+                        <label for="anarchist">Softcore Anarchist</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio('archetype', 'vulnerable')">
+                        <input type="radio" name="archetype" value="vulnerable" id="vulnerable">
+                        <label for="vulnerable">Vulnerable Main Character</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="goals">Goals and Intentions</label>
+                <textarea id="goals" name="goals" rows="3" placeholder="What are you working towards? What do you need guidance on?"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="preferredGuru">Preferred Guru or Voice</label>
+                <input type="text" id="preferredGuru" name="preferredGuru" placeholder="e.g., Mystic Meg, Susan Miller, Co-Star app style">
+            </div>
+            
+            <!-- Data Richness Indicator -->
+            <div class="data-richness">
+                <p><strong>Data Richness Level:</strong> <span id="richnessLevel">Basic (1/12)</span></p>
+                <div class="richness-bar">
+                    <div class="richness-fill" id="richnessFill"></div>
+                </div>
+                <p><em>More data points = richer, more personalized reading</em></p>
+            </div>
+            
+            <button type="submit" class="generate-btn" id="generateBtn">✨ Generate My Cosmic Reading</button>
+        </form>
+        
+        <div class="output-section" id="outputSection">
+            <h3>🌟 Your Personalized Horoscope</h3>
+            <div id="loadingIndicator" style="text-align: center; padding: 20px; display: none;">
+                <p>✨ The cosmos are aligning your reading...</p>
+                <div style="margin: 10px 0;">🌙 ☿ ♀ ☉ ♂ ♃ ♄</div>
+            </div>
+            
+            <div id="horoscopeResult" style="display: none;">
+                <div style="background: #fff; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; margin: 15px 0;">
+                    <div id="horoscopeContent" style="line-height: 1.6; color: #2d3748;"></div>
+                </div>
+                
+                <div style="margin-top: 15px; padding: 15px; background: #f0f4f8; border-radius: 8px; font-size: 14px; color: #718096;">
+                    <strong>Reading Details:</strong><br>
+                    Zodiac Sign: <span id="resultZodiac"></span><br>
+                    Data Level: <span id="resultDataLevel"></span><br>
+                    Generated: <span id="resultTimestamp"></span>
+                </div>
+                
+                <button class="copy-btn" onclick="copyHoroscope()" style="margin-top: 10px;">Share This Reading</button>
+            </div>
+            
+            <div id="errorMessage" style="display: none; color: #e53e3e; padding: 15px; background: #fed7d7; border-radius: 8px; margin: 15px 0;">
+            </div>
+            
+            <!-- Debug section - can be hidden in production -->
+            <details style="margin-top: 20px;">
+                <summary style="cursor: pointer; color: #718096;">🔧 Debug: View Data Package</summary>
+                <div class="json-output" id="jsonOutput" style="margin-top: 10px;"></div>
+                <button class="copy-btn" onclick="copyToClipboard()">Copy JSON</button>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        let formData = {};
+        let filledFields = 1; // Start with 1 for required date field
+        
+        function selectRadio(name, value) {
+            // Remove selected class from all options in this group
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                radio.closest('.radio-option').classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            event.currentTarget.classList.add('selected');
+            
+            // Check the radio button
+            document.getElementById(value).checked = true;
+            
+            updateDataRichness();
+        }
+        
+        function updateDataRichness() {
+            const filled = getFilledFieldCount();
+            const percentage = (filled / 12) * 100;
+            document.getElementById('richnessFill').style.width = percentage + '%';
+            document.getElementById('richnessLevel').textContent = `Level ${filled}/12 - ${getrichnessLabel(filled)}`;
+        }
+        
+        function getrichnessLabel(count) {
+            if (count <= 2) return 'Basic';
+            if (count <= 5) return 'Getting Interesting';
+            if (count <= 8) return 'Rich & Detailed';
+            if (count <= 11) return 'Cosmic Deep Dive';
+            return 'Maximum Cosmic Intel';
+        }
+        
+        // Add event listeners to all inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('horoscopeForm');
+            
+            // Add listeners to all form elements
+            form.addEventListener('input', updateDataRichness);
+            form.addEventListener('change', updateDataRichness);
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateDataPackage();
+            });
+            
+            // Initial update
+            updateDataRichness();
+        });
+        
+        function generateDataPackage() {
+            const form = document.getElementById('horoscopeForm');
+            const formData = new FormData(form);
+            
+            const dataPackage = {
+                timestamp: new Date().toISOString(),
+                dataRichness: {
+                    level: getFilledFieldCount(),
+                    percentage: Math.round((getFilledFieldCount() / 12) * 100)
+                },
+                required: {},
+                optional: {},
+                preferences: {},
+                context: {}
+            };
+            
+            // Process form data
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    switch(key) {
+                        case 'dateOfBirth':
+                            dataPackage.required.dateOfBirth = value;
+                            dataPackage.required.zodiacSign = calculateZodiacSign(value);
+                            break;
+                        case 'timeOfBirth':
+                        case 'birthplace':
+                        case 'currentLocation':
+                        case 'sexAssigned':
+                        case 'genderIdentity':
+                            dataPackage.optional[key] = value;
+                            break;
+                        case 'lengthFormat':
+                        case 'heartStatus':
+                        case 'vibeCheck':
+                        case 'archetype':
+                        case 'preferredGuru':
+                            dataPackage.preferences[key] = value;
+                            break;
+                        case 'goals':
+                            dataPackage.context.goalsAndIntentions = value;
+                            break;
+                    }
+                }
+            }
+            
+            // Show debug data
+            document.getElementById('jsonOutput').textContent = JSON.stringify(dataPackage, null, 2);
+            
+            // Generate horoscope via API
+            generateHoroscope(dataPackage);
+        }
+        
+        async function generateHoroscope(dataPackage) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const generateBtn = document.getElementById('generateBtn');
+            const outputSection = document.getElementById('outputSection');
+            const horoscopeResult = document.getElementById('horoscopeResult');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Show loading state
+            generateBtn.disabled = true;
+            generateBtn.textContent = '🌟 Consulting the Stars...';
+            outputSection.style.display = 'block';
+            loadingIndicator.style.display = 'block';
+            horoscopeResult.style.display = 'none';
+            errorMessage.style.display = 'none';
+            outputSection.scrollIntoView({behavior: 'smooth'});
+            
+            try {
+                const response = await fetch('/api/generate-horoscope', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataPackage)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Display successful result
+                    document.getElementById('horoscopeContent').innerHTML = formatHoroscope(result.horoscope);
+                    document.getElementById('resultZodiac').textContent = result.zodiacSign;
+                    document.getElementById('resultDataLevel').textContent = `${result.dataLevel}/12`;
+                    document.getElementById('resultTimestamp').textContent = new Date(result.generatedAt).toLocaleString();
+                    
+                    loadingIndicator.style.display = 'none';
+                    horoscopeResult.style.display = 'block';
+                } else {
+                    throw new Error(result.error || 'Unknown error occurred');
+                }
+                
+            } catch (error) {
+                console.error('Error generating horoscope:', error);
+                loadingIndicator.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.innerHTML = `
+                    <strong>Oops! The cosmic connection failed.</strong><br>
+                    ${error.message}<br>
+                    <small>Check your internet connection and try again.</small>
+                `;
+            } finally {
+                // Reset button
+                generateBtn.disabled = false;
+                generateBtn.textContent = '✨ Generate My Cosmic Reading';
+            }
+        }
+        
+        function formatHoroscope(text) {
+            // Simple formatting to make the horoscope more readable
+            return text
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/^/, '<p>')
+                .replace(/$/, '</p>');
+        }
+        
+        function getFilledFieldCount() {
+            const form = document.getElementById('horoscopeForm');
+            const formData = new FormData(form);
+            
+            let filled = 0;
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    filled++;
+                }
+            }
+            
+            // Add text inputs and textareas that might not be in FormData
+            const textInputs = form.querySelectorAll('input[type="text"], textarea');
+            textInputs.forEach(input => {
+                if (input.value && input.value.trim() !== '' && !formData.has(input.name)) {
+                    filled++;
+                }
+            });
+            
+            return filled;
+        }
+        
+        function calculateZodiacSign(dateString) {
+            const date = new Date(dateString);
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            
+            const signs = [
+                {sign: 'Capricorn', start: [12, 22], end: [1, 19]},
+                {sign: 'Aquarius', start: [1, 20], end: [2, 18]},
+                {sign: 'Pisces', start: [2, 19], end: [3, 20]},
+                {sign: 'Aries', start: [3, 21], end: [4, 19]},
+                {sign: 'Taurus', start: [4, 20], end: [5, 20]},
+                {sign: 'Gemini', start: [5, 21], end: [6, 20]},
+                {sign: 'Cancer', start: [6, 21], end: [7, 22]},
+                {sign: 'Leo', start: [7, 23], end: [8, 22]},
+                {sign: 'Virgo', start: [8, 23], end: [9, 22]},
+                {sign: 'Libra', start: [9, 23], end: [10, 22]},
+                {sign: 'Scorpio', start: [10, 23], end: [11, 21]},
+                {sign: 'Sagittarius', start: [11, 22], end: [12, 21]}
+            ];
+            
+            for (let {sign, start, end} of signs) {
+                if ((month === start[0] && day >= start[1]) || (month === end[0] && day <= end[1])) {
+                    return sign;
+                }
+            }
+            return 'Unknown';
+        }
+        
+        function copyHoroscope() {
+            const horoscopeText = document.getElementById('horoscopeContent').innerText;
+            const zodiac = document.getElementById('resultZodiac').textContent;
+            const dataLevel = document.getElementById('resultDataLevel').textContent;
+            const timestamp = document.getElementById('resultTimestamp').textContent;
+            
+            const shareText = `🌟 My ${zodiac} Horoscope (Data Level: ${dataLevel})
+Generated: ${timestamp}
+
+${horoscopeText}
+
+✨ Generated by Cosmic Data Collector`;
+            
+            navigator.clipboard.writeText(shareText).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied! ✨';
+                btn.style.background = '#48bb78';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#48bb78';
+                }, 2000);
+            });
+        }
+        
+        function copyToClipboard() {
+            const jsonText = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied! ✓';
+                btn.style.background = '#48bb78';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#48bb78';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
