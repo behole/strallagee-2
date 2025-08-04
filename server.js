@@ -171,8 +171,13 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Serve the frontend
+// Serve the frontend - now defaults to sacred geometry interface
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sacred-geometry.html'));
+});
+
+// Keep old interface available at /simple
+app.get('/simple', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
