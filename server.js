@@ -99,8 +99,18 @@ function buildPrompt(userData) {
         prompt += `**Current Goals & Intentions:**\n${context.goalsAndIntentions}\n\n`;
     }
     
+    // Additional context from sacred geometry form
+    if (context.currentMood || context.lifePhase || context.spiritualPractice || context.challengesFacing) {
+        prompt += `**Additional Context:**\n`;
+        if (context.currentMood) prompt += `- Current Mood: ${context.currentMood}\n`;
+        if (context.lifePhase) prompt += `- Life Phase: ${context.lifePhase}\n`;
+        if (context.spiritualPractice) prompt += `- Spiritual Practice: ${context.spiritualPractice}\n`;
+        if (context.challengesFacing) prompt += `- Current Challenges: ${context.challengesFacing}\n`;
+        prompt += `\n`;
+    }
+    
     // Data richness instruction
-    prompt += `**Data Richness Level: ${dataRichness.level}/12 (${dataRichness.percentage}%)**\n`;
+    prompt += `**Data Richness Level: ${dataRichness.level}/16 (${dataRichness.percentage}%)**\n`;
     prompt += `Tailor the depth and personalization of your reading to match this data level. `;
     
     if (dataRichness.level <= 2) {
