@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sacred Geometry Horoscope Survey</title>
     <style>
         * {
@@ -194,22 +194,35 @@
 
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
             .container {
                 flex-direction: column;
                 height: 100vh;
+                width: 100vw;
             }
             
             .wheel-container {
                 flex: 1;
                 min-height: 60vh;
-                padding: 20px;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                width: 100%;
+                overflow: hidden;
             }
             
             .sacred-wheel {
-                width: 90vw;
-                height: 90vw;
-                max-width: 400px;
-                max-height: 400px;
+                width: 80vw;
+                height: 80vw;
+                max-width: 350px;
+                max-height: 350px;
+                position: relative;
+                margin: 0 auto;
             }
             
             .center-node {
@@ -247,11 +260,16 @@
         }
 
         @media (max-width: 480px) {
+            .wheel-container {
+                padding: 5px;
+                min-height: 55vh;
+            }
+            
             .sacred-wheel {
-                width: 85vw;
-                height: 85vw;
-                max-width: 300px;
-                max-height: 300px;
+                width: 75vw;
+                height: 75vw;
+                max-width: 280px;
+                max-height: 280px;
             }
             
             .center-node {
@@ -473,9 +491,17 @@
         function initializeWheel() {
             const wheel = document.getElementById('sacred-wheel');
             
-            // Get responsive wheel dimensions
-            const wheelRect = wheel.getBoundingClientRect();
-            const wheelSize = Math.min(wheelRect.width, wheelRect.height);
+            // Force a layout recalculation
+            wheel.style.display = 'none';
+            wheel.offsetHeight; // Trigger reflow
+            wheel.style.display = 'relative';
+            
+            // Get responsive wheel dimensions - use computed style for more accuracy
+            const computedStyle = window.getComputedStyle(wheel);
+            const wheelWidth = parseInt(computedStyle.width);
+            const wheelHeight = parseInt(computedStyle.height);
+            const wheelSize = Math.min(wheelWidth, wheelHeight);
+            
             const centerX = wheelSize / 2;
             const centerY = wheelSize / 2;
             const innerRadius = wheelSize * 0.23; // 23% of wheel size
@@ -623,8 +649,10 @@
             document.querySelectorAll('.connection-line').forEach(line => line.remove());
 
             const wheel = document.getElementById('sacred-wheel');
-            const wheelRect = wheel.getBoundingClientRect();
-            const wheelSize = Math.min(wheelRect.width, wheelRect.height);
+            const computedStyle = window.getComputedStyle(wheel);
+            const wheelWidth = parseInt(computedStyle.width);
+            const wheelHeight = parseInt(computedStyle.height);
+            const wheelSize = Math.min(wheelWidth, wheelHeight);
             const centerX = wheelSize / 2;
             const centerY = wheelSize / 2;
 
@@ -865,14 +893,16 @@
         document.addEventListener('DOMContentLoaded', initializeWheel);
         
         // Recalculate on window resize for responsive behavior
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            // Clear existing nodes
-            document.querySelectorAll('.node').forEach(node => node.remove());
-            document.querySelectorAll('.connection-line').forEach(line => line.remove());
-            nodes = [];
-            
-            // Reinitialize
-            setTimeout(() => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Clear existing nodes
+                document.querySelectorAll('.node').forEach(node => node.remove());
+                document.querySelectorAll('.connection-line').forEach(line => line.remove());
+                nodes = [];
+                
+                // Reinitialize
                 initializeWheel();
                 // Restore answered questions
                 Object.keys(answers).forEach(questionId => {
@@ -882,7 +912,7 @@
                     }
                 });
                 updateConnections();
-            }, 100);
+            }, 200);
         });
     </script>
 </body>
