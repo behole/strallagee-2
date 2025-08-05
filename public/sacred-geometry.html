@@ -491,11 +491,6 @@
         function initializeWheel() {
             const wheel = document.getElementById('sacred-wheel');
             
-            // Force a layout recalculation
-            wheel.style.display = 'none';
-            wheel.offsetHeight; // Trigger reflow
-            wheel.style.display = 'relative';
-            
             // Get responsive wheel dimensions - use computed style for more accuracy
             const computedStyle = window.getComputedStyle(wheel);
             const wheelWidth = parseInt(computedStyle.width);
