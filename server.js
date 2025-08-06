@@ -50,7 +50,8 @@ function buildPrompt(userData) {
     const { dataRichness, required, optional, preferences, context } = userData;
     
     // Base prompt structure
-    let prompt = `You are a skilled astrologer creating a personalized horoscope. Here's what you know about this person:\n\n`;
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    let prompt = `You are a skilled astrologer creating a personalized horoscope for today, ${today}. Here's what you know about this person:\n\n`;
     
     // Required info
     prompt += `**Core Info:**\n`;
