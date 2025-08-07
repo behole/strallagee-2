@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horoscope Survey - Data Collection POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sacred Geometry Horoscope Survey</title>
     <style>
         * {
             margin: 0;
@@ -13,642 +13,909 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000;
             min-height: 100vh;
-            padding: 20px;
+            overflow: hidden;
+            color: white;
         }
         
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            width: 100vw;
+            height: 100vh;
         }
         
-        h1 {
-            text-align: center;
-            color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #718096;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-        
-        .required {
-            color: #e53e3e;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .radio-group, .checkbox-group {
-            display: grid;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        
-        .radio-option, .checkbox-option {
+        .wheel-container {
+            flex: 1;
             display: flex;
             align-items: center;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .sacred-wheel {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+        
+        .center-node {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 18px;
+            z-index: 10;
+        }
+        
+        .node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            z-index: 5;
         }
         
-        .radio-option:hover, .checkbox-option:hover {
-            border-color: #667eea;
-            background: #f7fafc;
+        .node.empty {
+            background: transparent;
+            border: 2px solid #333;
+            color: #666;
         }
         
-        .radio-option.selected, .checkbox-option.selected {
-            border-color: #667eea;
-            background: #edf2f7;
+        .node.filled-white {
+            background: white;
+            color: #000;
+            border: none;
         }
         
-        .radio-option input, .checkbox-option input {
-            width: auto;
-            margin-right: 10px;
-        }
-        
-        .data-richness {
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .richness-bar {
-            width: 100%;
-            height: 10px;
-            background: #e2e8f0;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        
-        .richness-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-            width: 8.33%;
-        }
-        
-        .generate-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .node.filled-purple {
+            background: #7c3aed;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s ease;
         }
         
-        .generate-btn:hover {
-            transform: translateY(-2px);
+        .node.current {
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.8);
+            transform: scale(1.1);
         }
         
-        .generate-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .connection-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            transform-origin: left center;
+            z-index: 1;
         }
         
-        .output-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 10px;
+        .sidebar {
+            width: 400px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid #333;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .question-container {
             display: none;
         }
         
-        .json-output {
-            background: #2d3748;
-            color: #68d391;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            margin-top: 10px;
+        .question-container.active {
+            display: block;
         }
         
-        .copy-btn {
-            background: #48bb78;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
+        .question-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+        
+        .question-options {
+            margin-bottom: 40px;
+        }
+        
+        .option {
+            display: block;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .option:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: #7c3aed;
+        }
+        
+        .option.selected {
+            background: #7c3aed;
+            border-color: #7c3aed;
+        }
+        
+        .navigation {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: 1px solid #333;
+            background: transparent;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            border-color: #7c3aed;
+            background: rgba(124, 58, 237, 0.1);
+        }
+        
+        .btn.primary {
+            background: #7c3aed;
+            border-color: #7c3aed;
+        }
+        
+        .btn.primary:hover {
+            background: #6d28d9;
+        }
+        
+        .progress {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                overflow: auto;
+            }
+            
+            .container {
+                flex-direction: column;
+                min-height: 100vh;
+                width: 100vw;
+                overflow-x: hidden;
+            }
+            
+            .wheel-container {
+                flex: 1;
+                min-height: 50vh;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                width: 100%;
+                max-width: 100vw;
+                box-sizing: border-box;
+                overflow: visible;
+            }
+            
+            .sacred-wheel {
+                width: min(80vw, 350px);
+                height: min(80vw, 350px);
+                position: relative;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .center-node {
+                width: 80px;
+                height: 80px;
+                font-size: 14px;
+            }
+            
+            .node {
+                width: 40px;
+                height: 40px;
+                font-size: 12px;
+            }
+            
+            .sidebar {
+                width: 100%;
+                flex-shrink: 0;
+                min-height: 300px;
+                max-height: 50vh;
+                border-left: none;
+                border-top: 1px solid #333;
+                padding: 20px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+            
+            .question-title {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+            
+            .progress {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wheel-container {
+                padding: 15px;
+                min-height: 45vh;
+            }
+            
+            .sacred-wheel {
+                width: min(75vw, 280px);
+                height: min(75vw, 280px);
+            }
+            
+            .center-node {
+                width: 60px;
+                height: 60px;
+                font-size: 12px;
+            }
+            
+            .node {
+                width: 30px;
+                height: 30px;
+                font-size: 10px;
+            }
+            
+            .sidebar {
+                padding: 15px;
+                min-height: 250px;
+            }
+            
+            .question-title {
+                font-size: 16px;
+                margin-bottom: 15px;
+                line-height: 1.2;
+            }
+            
+            .option {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌟 Cosmic Data Collector</h1>
-        <p class="subtitle">The more you share, the richer your cosmic reading becomes</p>
+        <div class="wheel-container">
+            <div class="progress">
+                <span id="progress-text">0/16 questions answered</span>
+            </div>
+            
+            <div class="sacred-wheel" id="sacred-wheel">
+                <div class="center-node">LESLIE</div>
+                <!-- Nodes will be generated by JavaScript -->
+            </div>
+        </div>
         
-        <form id="horoscopeForm">
-            <!-- Required Field -->
-            <div class="form-group">
-                <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
-                <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+        <div class="sidebar">
+            <div id="questions-container">
+                <!-- Questions will be loaded here -->
             </div>
             
-            <!-- Optional Fields -->
-            <div class="form-group">
-                <label for="timeOfBirth">Time of Birth (for rising sign & houses)</label>
-                <input type="time" id="timeOfBirth" name="timeOfBirth">
+            <div class="navigation">
+                <button class="btn" id="prev-btn" onclick="previousQuestion()">PREV</button>
+                <button class="btn" id="next-btn" onclick="nextQuestion()">NEXT</button>
+                <button class="btn primary" id="go-btn" onclick="generateHoroscope()" style="display: none;">GO →</button>
             </div>
-            
-            <div class="form-group">
-                <label for="birthplace">Birthplace (City, Country)</label>
-                <input type="text" id="birthplace" name="birthplace" placeholder="e.g., New York, USA">
-            </div>
-            
-            <div class="form-group">
-                <label for="currentLocation">Current Location</label>
-                <input type="text" id="currentLocation" name="currentLocation" placeholder="e.g., Los Angeles, USA">
-            </div>
-            
-            <div class="form-group">
-                <label for="sexAssigned">Sex Assigned at Birth (for medical astrology)</label>
-                <select id="sexAssigned" name="sexAssigned">
-                    <option value="">Prefer not to say</option>
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
-                    <option value="intersex">Intersex</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="genderIdentity">Gender Identity (for personalization)</label>
-                <input type="text" id="genderIdentity" name="genderIdentity" placeholder="e.g., she/her, he/him, they/them">
-            </div>
-            
-            <div class="form-group">
-                <label>Reading Length/Format</label>
-                <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'quick')">
-                        <input type="radio" name="lengthFormat" value="quick" id="quick">
-                        <label for="quick">Quick hit - what's happening TODAY?</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'twoWeeks')">
-                        <input type="radio" name="lengthFormat" value="twoWeeks" id="twoWeeks">
-                        <label for="twoWeeks">Next two weeks overview</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('lengthFormat', 'detailed')">
-                        <input type="radio" name="lengthFormat" value="detailed" id="detailed">
-                        <label for="detailed">Long nerdy format - give me everything</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>💘 Current Heart Status</label>
-                <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'single')">
-                        <input type="radio" name="heartStatus" value="single" id="single">
-                        <label for="single">Single & thriving</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'crushing')">
-                        <input type="radio" name="heartStatus" value="crushing" id="crushing">
-                        <label for="crushing">Crushing in silence</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'situationship')">
-                        <input type="radio" name="heartStatus" value="situationship" id="situationship">
-                        <label for="situationship">It's a Situationship™</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'vibing')">
-                        <input type="radio" name="heartStatus" value="vibing" id="vibing">
-                        <label for="vibing">Just vibing (playin' the field)</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'partnered')">
-                        <input type="radio" name="heartStatus" value="partnered" id="partnered">
-                        <label for="partnered">Partnered (boo'd up)</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('heartStatus', 'married')">
-                        <input type="radio" name="heartStatus" value="married" id="married">
-                        <label for="married">Married (to a human... or the hustle)</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Vibe Check - Today I need:</label>
-                <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'encouragement')">
-                        <input type="radio" name="vibeCheck" value="encouragement" id="encouragement">
-                        <label for="encouragement">🐝 A Buzz of Encouragement</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'fire')">
-                        <input type="radio" name="vibeCheck" value="fire" id="fire">
-                        <label for="fire">🔥 A Fire to Kick You into Gear</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'reflection')">
-                        <input type="radio" name="vibeCheck" value="reflection" id="reflection">
-                        <label for="reflection">🧘 A Soulful Reflection</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('vibeCheck', 'sass')">
-                        <input type="radio" name="vibeCheck" value="sass" id="sass">
-                        <label for="sass">💅 A Cosmic Read with Sass</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Your Archetype</label>
-                <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio('archetype', 'cottagecore')">
-                        <input type="radio" name="archetype" value="cottagecore" id="cottagecore">
-                        <label for="cottagecore">Cottagecore Witch</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'tasmanian')">
-                        <input type="radio" name="archetype" value="tasmanian" id="tasmanian">
-                        <label for="tasmanian">Tasmanian Devil</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'corporate')">
-                        <input type="radio" name="archetype" value="corporate" id="corporate">
-                        <label for="corporate">Corporate Power Suit</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'rainbow')">
-                        <input type="radio" name="archetype" value="rainbow" id="rainbow">
-                        <label for="rainbow">Rainbow Manifestor</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'sadgirl')">
-                        <input type="radio" name="archetype" value="sadgirl" id="sadgirl">
-                        <label for="sadgirl">🥀 Sad Girl Oracle</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'nerd')">
-                        <input type="radio" name="archetype" value="nerd" id="nerd">
-                        <label for="nerd">Super Nerd</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'overwhelmed')">
-                        <input type="radio" name="archetype" value="overwhelmed" id="overwhelmed">
-                        <label for="overwhelmed">Circular Thinker, Over-Stressed - NEED HELP</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'anarchist')">
-                        <input type="radio" name="archetype" value="anarchist" id="anarchist">
-                        <label for="anarchist">Softcore Anarchist</label>
-                    </div>
-                    <div class="radio-option" onclick="selectRadio('archetype', 'vulnerable')">
-                        <input type="radio" name="archetype" value="vulnerable" id="vulnerable">
-                        <label for="vulnerable">Vulnerable Main Character</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="goals">Goals and Intentions</label>
-                <textarea id="goals" name="goals" rows="3" placeholder="What are you working towards? What do you need guidance on?"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="preferredGuru">Preferred Guru or Voice</label>
-                <input type="text" id="preferredGuru" name="preferredGuru" placeholder="e.g., Mystic Meg, Susan Miller, Co-Star app style">
-            </div>
-            
-            <!-- Data Richness Indicator -->
-            <div class="data-richness">
-                <p><strong>Data Richness Level:</strong> <span id="richnessLevel">Basic (1/12)</span></p>
-                <div class="richness-bar">
-                    <div class="richness-fill" id="richnessFill"></div>
-                </div>
-                <p><em>More data points = richer, more personalized reading</em></p>
-            </div>
-            
-            <button type="submit" class="generate-btn" id="generateBtn">✨ Generate My Cosmic Reading</button>
-        </form>
-        
-        <div class="output-section" id="outputSection">
-            <h3>🌟 Your Personalized Horoscope</h3>
-            <div id="loadingIndicator" style="text-align: center; padding: 20px; display: none;">
-                <p>✨ The cosmos are aligning your reading...</p>
-                <div style="margin: 10px 0;">🌙 ☿ ♀ ☉ ♂ ♃ ♄</div>
-            </div>
-            
-            <div id="horoscopeResult" style="display: none;">
-                <div style="background: #fff; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; margin: 15px 0;">
-                    <div id="horoscopeContent" style="line-height: 1.6; color: #2d3748;"></div>
-                </div>
-                
-                <div style="margin-top: 15px; padding: 15px; background: #f0f4f8; border-radius: 8px; font-size: 14px; color: #718096;">
-                    <strong>Reading Details:</strong><br>
-                    Zodiac Sign: <span id="resultZodiac"></span><br>
-                    Data Level: <span id="resultDataLevel"></span><br>
-                    Generated: <span id="resultTimestamp"></span>
-                </div>
-                
-                <button class="copy-btn" onclick="copyHoroscope()" style="margin-top: 10px;">Share This Reading</button>
-            </div>
-            
-            <div id="errorMessage" style="display: none; color: #e53e3e; padding: 15px; background: #fed7d7; border-radius: 8px; margin: 15px 0;">
-            </div>
-            
-            <!-- Debug section - can be hidden in production -->
-            <details style="margin-top: 20px;">
-                <summary style="cursor: pointer; color: #718096;">🔧 Debug: View Data Package</summary>
-                <div class="json-output" id="jsonOutput" style="margin-top: 10px;"></div>
-                <button class="copy-btn" onclick="copyToClipboard()">Copy JSON</button>
-            </details>
         </div>
     </div>
 
     <script>
-        let formData = {};
-        let filledFields = 1; // Start with 1 for required date field
-        
-        function selectRadio(name, value) {
-            // Remove selected class from all options in this group
-            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
-                radio.closest('.radio-option').classList.remove('selected');
+        // 16 Survey questions - 8 white (first layer), 8 purple (second layer)
+        const questions = [
+            // FIRST LAYER - WHITE NODES (Core Questions)
+            {
+                id: 'zodiac',
+                title: 'Choose your Zodiac Sign',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+                    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+                ],
+                required: true
+            },
+            {
+                id: 'birthDate',
+                title: 'Your Birth Date',
+                type: 'date',
+                layer: 'white',
+                required: true
+            },
+            {
+                id: 'heartStatus',
+                title: 'Current Relationship Status',
+                type: 'select',
+                layer: 'white',
+                options: ['single', 'partnered', 'married', 'complicated', 'exploring']
+            },
+            {
+                id: 'vibeCheck',
+                title: 'What energy do you need today?',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'encouragement', label: 'Encouragement & positivity' },
+                    { value: 'fire', label: 'Motivation to take action' },
+                    { value: 'reflection', label: 'Deep reflection & wisdom' },
+                    { value: 'sass', label: 'Cosmic sass & straight talk' }
+                ]
+            },
+            {
+                id: 'archetype',
+                title: 'Which archetype resonates with you?',
+                type: 'select',
+                layer: 'white',
+                options: ['warrior', 'sage', 'lover', 'caregiver', 'rebel', 'vulnerable']
+            },
+            {
+                id: 'lengthFormat',
+                title: 'Preferred reading length',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'quick', label: 'Quick daily focus' },
+                    { value: 'twoWeeks', label: 'Two-week overview' },
+                    { value: 'detailed', label: 'Detailed nerdy format' }
+                ]
+            },
+            {
+                id: 'currentMood',
+                title: 'How are you feeling today?',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'optimistic', label: 'Optimistic & excited' },
+                    { value: 'anxious', label: 'Anxious or worried' },
+                    { value: 'neutral', label: 'Neutral & balanced' },
+                    { value: 'creative', label: 'Creative & inspired' },
+                    { value: 'tired', label: 'Tired or low energy' }
+                ]
+            },
+            {
+                id: 'lifePhase',
+                title: 'What phase of life are you in?',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'exploring', label: 'Exploring & discovering' },
+                    { value: 'building', label: 'Building & creating' },
+                    { value: 'transitioning', label: 'In transition' },
+                    { value: 'reflecting', label: 'Reflecting & reassessing' },
+                    { value: 'growing', label: 'Learning & growing' }
+                ]
+            },
+            
+            // SECOND LAYER - PURPLE NODES (Advanced Questions)
+            {
+                id: 'birthTime',
+                title: 'Birth Time (if known)',
+                type: 'time',
+                layer: 'purple'
+            },
+            {
+                id: 'birthplace',
+                title: 'Birth Location',
+                type: 'text',
+                layer: 'purple',
+                placeholder: 'City, Country'
+            },
+            {
+                id: 'currentLocation',
+                title: 'Current Location',
+                type: 'text',
+                layer: 'purple',
+                placeholder: 'City, Country'
+            },
+            {
+                id: 'sexAssigned',
+                title: 'Sex Assigned at Birth',
+                type: 'select',
+                layer: 'purple',
+                options: ['female', 'male', 'intersex', 'prefer not to say']
+            },
+            {
+                id: 'genderIdentity',
+                title: 'Preferred Pronouns',
+                type: 'text',
+                layer: 'purple',
+                placeholder: 'they/them, she/her, he/him, etc.'
+            },
+            {
+                id: 'spiritualPractice',
+                title: 'Spiritual or mindfulness practices',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    { value: 'meditation', label: 'Meditation' },
+                    { value: 'yoga', label: 'Yoga' },
+                    { value: 'prayer', label: 'Prayer' },
+                    { value: 'journaling', label: 'Journaling' },
+                    { value: 'nature', label: 'Time in nature' },
+                    { value: 'none', label: 'None currently' }
+                ]
+            },
+            {
+                id: 'challengesFacing',
+                title: 'What challenges are you currently facing?',
+                type: 'textarea',
+                layer: 'purple',
+                placeholder: 'Career, relationships, personal growth, health, etc.'
+            },
+            {
+                id: 'goalsAndIntentions',
+                title: 'Current Goals & Intentions',
+                type: 'textarea',
+                layer: 'purple',
+                placeholder: 'What are you working on in your life right now?'
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let nodes = [];
+
+        function initializeWheel() {
+            const wheel = document.getElementById('sacred-wheel');
+            
+            // Get responsive wheel dimensions - use computed style for more accuracy
+            const computedStyle = window.getComputedStyle(wheel);
+            const wheelWidth = parseInt(computedStyle.width);
+            const wheelHeight = parseInt(computedStyle.height);
+            const wheelSize = Math.min(wheelWidth, wheelHeight);
+            
+            const centerX = wheelSize / 2;
+            const centerY = wheelSize / 2;
+            const innerRadius = wheelSize * 0.23; // 23% of wheel size
+            const outerRadius = wheelSize * 0.37;  // 37% of wheel size
+
+            // Separate white and purple questions
+            const whiteQuestions = questions.filter(q => q.layer === 'white');
+            const purpleQuestions = questions.filter(q => q.layer === 'purple');
+
+            // Create white nodes (inner circle) - 8 nodes evenly spaced
+            whiteQuestions.forEach((question, index) => {
+                const questionIndex = questions.indexOf(question);
+                const angle = (index * 45) * (Math.PI / 180); // 45 degrees apart for 8 nodes
+                
+                const x = centerX + innerRadius * Math.cos(angle - Math.PI / 2);
+                const y = centerY + innerRadius * Math.sin(angle - Math.PI / 2);
+
+                const node = document.createElement('div');
+                node.className = 'node empty';
+                node.style.left = (x - 30) + 'px';
+                node.style.top = (y - 30) + 'px';
+                node.textContent = questionIndex + 1;
+                node.dataset.questionIndex = questionIndex;
+                node.onclick = () => goToQuestion(questionIndex);
+
+                wheel.appendChild(node);
+                nodes.push({
+                    element: node,
+                    x: x,
+                    y: y,
+                    questionIndex: questionIndex,
+                    layer: question.layer
+                });
             });
-            
-            // Add selected class to clicked option
-            event.currentTarget.classList.add('selected');
-            
-            // Check the radio button
-            document.getElementById(value).checked = true;
-            
-            updateDataRichness();
-        }
-        
-        function updateDataRichness() {
-            const filled = getFilledFieldCount();
-            const percentage = (filled / 12) * 100;
-            document.getElementById('richnessFill').style.width = percentage + '%';
-            document.getElementById('richnessLevel').textContent = `Level ${filled}/12 - ${getrichnessLabel(filled)}`;
-        }
-        
-        function getrichnessLabel(count) {
-            if (count <= 2) return 'Basic';
-            if (count <= 5) return 'Getting Interesting';
-            if (count <= 8) return 'Rich & Detailed';
-            if (count <= 11) return 'Cosmic Deep Dive';
-            return 'Maximum Cosmic Intel';
-        }
-        
-        // Add event listeners to all inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('horoscopeForm');
-            
-            // Add listeners to all form elements
-            form.addEventListener('input', updateDataRichness);
-            form.addEventListener('change', updateDataRichness);
-            
-            // Form submission
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                generateDataPackage();
+
+            // Create purple nodes (outer circle) - 8 nodes evenly spaced, offset by 22.5°
+            purpleQuestions.forEach((question, index) => {
+                const questionIndex = questions.indexOf(question);
+                const angle = (index * 45 + 22.5) * (Math.PI / 180); // 45 degrees apart, offset by 22.5°
+                
+                const x = centerX + outerRadius * Math.cos(angle - Math.PI / 2);
+                const y = centerY + outerRadius * Math.sin(angle - Math.PI / 2);
+
+                const node = document.createElement('div');
+                node.className = 'node empty';
+                node.style.left = (x - 30) + 'px';
+                node.style.top = (y - 30) + 'px';
+                node.textContent = questionIndex + 1;
+                node.dataset.questionIndex = questionIndex;
+                node.onclick = () => goToQuestion(questionIndex);
+
+                wheel.appendChild(node);
+                nodes.push({
+                    element: node,
+                    x: x,
+                    y: y,
+                    questionIndex: questionIndex,
+                    layer: question.layer
+                });
             });
-            
-            // Initial update
-            updateDataRichness();
-        });
-        
-        function generateDataPackage() {
-            const form = document.getElementById('horoscopeForm');
-            const formData = new FormData(form);
-            
-            const dataPackage = {
-                timestamp: new Date().toISOString(),
-                dataRichness: {
-                    level: getFilledFieldCount(),
-                    percentage: Math.round((getFilledFieldCount() / 12) * 100)
-                },
-                required: {},
-                optional: {},
-                preferences: {},
-                context: {}
-            };
-            
-            // Process form data
-            for (let [key, value] of formData.entries()) {
-                if (value && value.trim() !== '') {
-                    switch(key) {
-                        case 'dateOfBirth':
-                            dataPackage.required.dateOfBirth = value;
-                            dataPackage.required.zodiacSign = calculateZodiacSign(value);
-                            break;
-                        case 'timeOfBirth':
-                        case 'birthplace':
-                        case 'currentLocation':
-                        case 'sexAssigned':
-                        case 'genderIdentity':
-                            dataPackage.optional[key] = value;
-                            break;
-                        case 'lengthFormat':
-                        case 'heartStatus':
-                        case 'vibeCheck':
-                        case 'archetype':
-                        case 'preferredGuru':
-                            dataPackage.preferences[key] = value;
-                            break;
-                        case 'goals':
-                            dataPackage.context.goalsAndIntentions = value;
-                            break;
+
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const question = questions[index];
+            const container = document.getElementById('questions-container');
+
+            // Update current node highlighting
+            nodes.forEach((node, i) => {
+                node.element.classList.toggle('current', i === index);
+            });
+
+            // Generate question HTML
+            let optionsHTML = '';
+            if (question.type === 'select' && question.options) {
+                question.options.forEach(option => {
+                    const value = typeof option === 'object' ? option.value : option;
+                    const label = typeof option === 'object' ? option.label : option;
+                    const selected = answers[question.id] === value ? 'selected' : '';
+                    optionsHTML += `<div class="option ${selected}" onclick="selectOption('${question.id}', '${value}')">${label}</div>`;
+                });
+            } else if (question.type === 'date') {
+                const value = answers[question.id] || '';
+                optionsHTML = `<input type="date" value="${value}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">`;
+            } else if (question.type === 'time') {
+                const value = answers[question.id] || '';
+                optionsHTML = `<input type="time" value="${value}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">`;
+            } else if (question.type === 'text') {
+                const value = answers[question.id] || '';
+                optionsHTML = `<input type="text" value="${value}" placeholder="${question.placeholder || ''}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">`;
+            } else if (question.type === 'textarea') {
+                const value = answers[question.id] || '';
+                optionsHTML = `<textarea rows="4" placeholder="${question.placeholder || ''}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; resize: vertical;">${value}</textarea>`;
+            }
+
+            container.innerHTML = `
+                <div class="question-container active">
+                    <div class="question-title">${question.title}</div>
+                    <div class="question-options">${optionsHTML}</div>
+                </div>
+            `;
+
+            updateProgress();
+            updateNavigation();
+        }
+
+        function selectOption(questionId, value) {
+            answers[questionId] = value;
+            const questionIndex = questions.findIndex(q => q.id === questionId);
+            updateNodeState(questionIndex);
+            updateConnections();
+            updateProgress();
+
+            // Auto-advance for select options
+            const question = questions[questionIndex];
+            if (question.type === 'select') {
+                setTimeout(() => {
+                    if (currentQuestionIndex < questions.length - 1) {
+                        nextQuestion();
                     }
+                }, 500);
+            }
+        }
+
+        function updateNodeState(questionIndex) {
+            const node = nodes[questionIndex];
+            const question = questions[questionIndex];
+            const isAnswered = answers[question.id];
+
+            if (isAnswered) {
+                node.element.classList.remove('empty');
+                if (question.layer === 'white') {
+                    node.element.classList.add('filled-white');
+                } else {
+                    node.element.classList.add('filled-purple');
+                }
+                node.element.textContent = '';
+            }
+        }
+
+        function updateConnections() {
+            // Remove existing connection lines
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+
+            const wheel = document.getElementById('sacred-wheel');
+            const computedStyle = window.getComputedStyle(wheel);
+            const wheelWidth = parseInt(computedStyle.width);
+            const wheelHeight = parseInt(computedStyle.height);
+            const wheelSize = Math.min(wheelWidth, wheelHeight);
+            const centerX = wheelSize / 2;
+            const centerY = wheelSize / 2;
+
+            // Draw connections from filled nodes to center
+            nodes.forEach(node => {
+                const questionIndex = node.questionIndex;
+                const question = questions[questionIndex];
+                const isAnswered = answers[question.id];
+
+                if (isAnswered) {
+                    drawLine(wheel, node.x, node.y, centerX, centerY);
+                }
+            });
+
+            // Draw connections between filled nodes of the same layer
+            const filledWhiteNodes = nodes.filter(node => {
+                const q = questions[node.questionIndex];
+                return answers[q.id] && q.layer === 'white';
+            });
+
+            const filledPurpleNodes = nodes.filter(node => {
+                const q = questions[node.questionIndex];
+                return answers[q.id] && q.layer === 'purple';
+            });
+
+            // Connect white nodes to each other
+            for (let i = 0; i < filledWhiteNodes.length; i++) {
+                for (let j = i + 1; j < filledWhiteNodes.length; j++) {
+                    drawLine(wheel, filledWhiteNodes[i].x, filledWhiteNodes[i].y, 
+                            filledWhiteNodes[j].x, filledWhiteNodes[j].y);
                 }
             }
-            
-            // Show debug data
-            document.getElementById('jsonOutput').textContent = JSON.stringify(dataPackage, null, 2);
-            
-            // Generate horoscope via API
-            generateHoroscope(dataPackage);
+
+            // Connect purple nodes to each other
+            for (let i = 0; i < filledPurpleNodes.length; i++) {
+                for (let j = i + 1; j < filledPurpleNodes.length; j++) {
+                    drawLine(wheel, filledPurpleNodes[i].x, filledPurpleNodes[i].y, 
+                            filledPurpleNodes[j].x, filledPurpleNodes[j].y);
+                }
+            }
+
+            // Connect white nodes to purple nodes for sacred geometry
+            filledWhiteNodes.forEach(whiteNode => {
+                filledPurpleNodes.forEach(purpleNode => {
+                    drawLine(wheel, whiteNode.x, whiteNode.y, purpleNode.x, purpleNode.y);
+                });
+            });
         }
-        
-        async function generateHoroscope(dataPackage) {
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const generateBtn = document.getElementById('generateBtn');
-            const outputSection = document.getElementById('outputSection');
-            const horoscopeResult = document.getElementById('horoscopeResult');
-            const errorMessage = document.getElementById('errorMessage');
+
+        function drawLine(container, x1, y1, x2, y2) {
+            const line = document.createElement('div');
+            line.className = 'connection-line';
             
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.height = '1px';
+            line.style.left = x1 + 'px';
+            line.style.top = y1 + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            container.appendChild(line);
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).length;
+            document.getElementById('progress-text').textContent = `${answeredCount}/16 questions answered`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const goBtn = document.getElementById('go-btn');
+
+            prevBtn.style.display = currentQuestionIndex > 0 ? 'block' : 'none';
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                goBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                goBtn.style.display = 'none';
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                loadQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                loadQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function goToQuestion(index) {
+            loadQuestion(index);
+        }
+
+        async function generateHoroscope() {
+            // Check if required fields are filled
+            if (!answers.zodiac || !answers.birthDate) {
+                alert('Please fill in your zodiac sign and birth date to generate a horoscope.');
+                return;
+            }
+
             // Show loading state
-            generateBtn.disabled = true;
-            generateBtn.textContent = '🌟 Consulting the Stars...';
-            outputSection.style.display = 'block';
-            loadingIndicator.style.display = 'block';
-            horoscopeResult.style.display = 'none';
-            errorMessage.style.display = 'none';
-            outputSection.scrollIntoView({behavior: 'smooth'});
-            
+            const goBtn = document.getElementById('go-btn');
+            const originalText = goBtn.textContent;
+            goBtn.textContent = 'Generating...';
+            goBtn.disabled = true;
+
             try {
+                // Convert answers to the expected format for the existing API
+                const userData = {
+                    timestamp: new Date().toISOString(),
+                    dataRichness: {
+                        level: Object.keys(answers).length,
+                        percentage: Math.round((Object.keys(answers).length / 16) * 100)
+                    },
+                    required: {
+                        dateOfBirth: answers.birthDate,
+                        zodiacSign: answers.zodiac
+                    },
+                    optional: {
+                        timeOfBirth: answers.birthTime,
+                        birthplace: answers.birthplace,
+                        currentLocation: answers.currentLocation,
+                        sexAssigned: answers.sexAssigned,
+                        genderIdentity: answers.genderIdentity
+                    },
+                    preferences: {
+                        lengthFormat: answers.lengthFormat,
+                        heartStatus: answers.heartStatus,
+                        vibeCheck: answers.vibeCheck,
+                        archetype: answers.archetype
+                    },
+                    context: {
+                        goalsAndIntentions: answers.goalsAndIntentions,
+                        currentMood: answers.currentMood,
+                        lifePhase: answers.lifePhase,
+                        spiritualPractice: answers.spiritualPractice,
+                        challengesFacing: answers.challengesFacing
+                    }
+                };
+
+                console.log('Generating horoscope with data:', userData);
+
+                // Call the existing horoscope generation API
                 const response = await fetch('/api/generate-horoscope', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(dataPackage)
+                    body: JSON.stringify(userData)
                 });
-                
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Display successful result
-                    document.getElementById('horoscopeContent').innerHTML = formatHoroscope(result.horoscope);
-                    document.getElementById('resultZodiac').textContent = result.zodiacSign;
-                    document.getElementById('resultDataLevel').textContent = `${result.dataLevel}/12`;
-                    document.getElementById('resultTimestamp').textContent = new Date(result.generatedAt).toLocaleString();
-                    
-                    loadingIndicator.style.display = 'none';
-                    horoscopeResult.style.display = 'block';
+                    // Display the horoscope result
+                    displayHoroscope(result);
                 } else {
-                    throw new Error(result.error || 'Unknown error occurred');
+                    throw new Error(result.message || 'Failed to generate horoscope');
                 }
-                
+
             } catch (error) {
                 console.error('Error generating horoscope:', error);
-                loadingIndicator.style.display = 'none';
-                errorMessage.style.display = 'block';
-                errorMessage.innerHTML = `
-                    <strong>Oops! The cosmic connection failed.</strong><br>
-                    ${error.message}<br>
-                    <small>Check your internet connection and try again.</small>
-                `;
+                alert(`Error generating horoscope: ${error.message}`);
             } finally {
-                // Reset button
-                generateBtn.disabled = false;
-                generateBtn.textContent = '✨ Generate My Cosmic Reading';
+                // Reset button state
+                goBtn.textContent = originalText;
+                goBtn.disabled = false;
             }
         }
-        
-        function formatHoroscope(text) {
-            // Simple formatting to make the horoscope more readable
-            return text
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>')
-                .replace(/^/, '<p>')
-                .replace(/$/, '</p>');
-        }
-        
-        function getFilledFieldCount() {
-            const form = document.getElementById('horoscopeForm');
-            const formData = new FormData(form);
-            
-            let filled = 0;
-            for (let [key, value] of formData.entries()) {
-                if (value && value.trim() !== '') {
-                    filled++;
-                }
-            }
-            
-            // Add text inputs and textareas that might not be in FormData
-            const textInputs = form.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
-                if (input.value && input.value.trim() !== '' && !formData.has(input.name)) {
-                    filled++;
-                }
-            });
-            
-            return filled;
-        }
-        
-        function calculateZodiacSign(dateString) {
-            const date = new Date(dateString);
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
-            
-            const signs = [
-                {sign: 'Capricorn', start: [12, 22], end: [1, 19]},
-                {sign: 'Aquarius', start: [1, 20], end: [2, 18]},
-                {sign: 'Pisces', start: [2, 19], end: [3, 20]},
-                {sign: 'Aries', start: [3, 21], end: [4, 19]},
-                {sign: 'Taurus', start: [4, 20], end: [5, 20]},
-                {sign: 'Gemini', start: [5, 21], end: [6, 20]},
-                {sign: 'Cancer', start: [6, 21], end: [7, 22]},
-                {sign: 'Leo', start: [7, 23], end: [8, 22]},
-                {sign: 'Virgo', start: [8, 23], end: [9, 22]},
-                {sign: 'Libra', start: [9, 23], end: [10, 22]},
-                {sign: 'Scorpio', start: [10, 23], end: [11, 21]},
-                {sign: 'Sagittarius', start: [11, 22], end: [12, 21]}
-            ];
-            
-            for (let {sign, start, end} of signs) {
-                if ((month === start[0] && day >= start[1]) || (month === end[0] && day <= end[1])) {
-                    return sign;
-                }
-            }
-            return 'Unknown';
-        }
-        
-        function copyHoroscope() {
-            const horoscopeText = document.getElementById('horoscopeContent').innerText;
-            const zodiac = document.getElementById('resultZodiac').textContent;
-            const dataLevel = document.getElementById('resultDataLevel').textContent;
-            const timestamp = document.getElementById('resultTimestamp').textContent;
-            
-            const shareText = `🌟 My ${zodiac} Horoscope (Data Level: ${dataLevel})
-Generated: ${timestamp}
 
-${horoscopeText}
+        function displayHoroscope(result) {
+            // Replace the sidebar with the horoscope result
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.innerHTML = `
+                <div style="max-height: 80vh; overflow-y: auto;">
+                    <h2 style="font-size: 24px; margin-bottom: 20px; color: #7c3aed;">
+                        Your ${result.zodiacSign} Reading
+                    </h2>
+                    <div style="color: #999; font-size: 14px; margin-bottom: 20px;">
+                        Data Level: ${result.dataLevel}/16 • Generated: ${new Date(result.generatedAt).toLocaleString()}
+                    </div>
+                    <div style="line-height: 1.6; font-size: 16px; white-space: pre-wrap;">
+                        ${result.horoscope}
+                    </div>
+                </div>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                    <button class="btn" onclick="startOver()">Create Another Reading</button>
+                </div>
+            `;
+        }
 
-✨ Generated by Cosmic Data Collector`;
+        function startOver() {
+            // Reset everything and start over
+            answers = {};
+            currentQuestionIndex = 0;
             
-            navigator.clipboard.writeText(shareText).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied! ✨';
-                btn.style.background = '#48bb78';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '#48bb78';
-                }, 2000);
+            // Reset all nodes
+            nodes.forEach(node => {
+                node.element.className = 'node empty';
+                node.element.textContent = nodes.indexOf(node) + 1;
             });
+            
+            // Clear connections
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            
+            // Reset sidebar
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.innerHTML = `
+                <div id="questions-container">
+                    <!-- Questions will be loaded here -->
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn" id="prev-btn" onclick="previousQuestion()">PREV</button>
+                    <button class="btn" id="next-btn" onclick="nextQuestion()">NEXT</button>
+                    <button class="btn primary" id="go-btn" onclick="generateHoroscope()" style="display: none;">GO →</button>
+                </div>
+            `;
+            
+            // Restart the survey
+            loadQuestion(0);
         }
+
+        // Initialize the wheel when page loads
+        document.addEventListener('DOMContentLoaded', initializeWheel);
         
-        function copyToClipboard() {
-            const jsonText = document.getElementById('jsonOutput').textContent;
-            navigator.clipboard.writeText(jsonText).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied! ✓';
-                btn.style.background = '#48bb78';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '#48bb78';
-                }, 2000);
-            });
-        }
+        // Recalculate on window resize for responsive behavior
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Clear existing nodes
+                document.querySelectorAll('.node').forEach(node => node.remove());
+                document.querySelectorAll('.connection-line').forEach(line => line.remove());
+                nodes = [];
+                
+                // Reinitialize
+                initializeWheel();
+                // Restore answered questions
+                Object.keys(answers).forEach(questionId => {
+                    const questionIndex = questions.findIndex(q => q.id === questionId);
+                    if (questionIndex !== -1) {
+                        updateNodeState(questionIndex);
+                    }
+                });
+                updateConnections();
+            }, 200);
+        });
     </script>
 </body>
 </html>
