@@ -202,7 +202,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 0;
-                overflow: auto;
+                overflow-x: hidden;
             }
             
             .container {
@@ -214,42 +214,38 @@
             
             .wheel-container {
                 flex: 1;
-                min-height: 50vh;
-                padding: 0;
+                min-height: 45vh;
+                padding: 10px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 position: relative;
-                width: 100vw;
+                width: 100%;
                 box-sizing: border-box;
-                overflow: visible;
-                margin-left: -20px;
-                margin-right: -20px;
             }
             
             .sacred-wheel {
-                width: min(80vw, 350px);
-                height: min(80vw, 350px);
+                width: min(85vw, 320px);
+                height: min(85vw, 320px);
                 position: relative;
             }
             
             .center-node {
-                width: 80px;
-                height: 80px;
-                font-size: 14px;
+                width: 70px;
+                height: 70px;
+                font-size: 13px;
             }
             
             .node {
-                width: 40px;
-                height: 40px;
-                font-size: 12px;
+                width: 35px;
+                height: 35px;
+                font-size: 11px;
             }
             
             .sidebar {
                 width: 100%;
                 flex-shrink: 0;
-                min-height: 300px;
-                max-height: 50vh;
+                min-height: 55vh;
                 border-left: none;
                 border-top: 1px solid #333;
                 padding: 20px;
@@ -260,8 +256,16 @@
             }
             
             .question-title {
-                font-size: 18px;
-                margin-bottom: 20px;
+                font-size: 20px;
+                margin-bottom: 25px;
+                line-height: 1.3;
+            }
+            
+            .option {
+                padding: 16px 20px;
+                margin-bottom: 12px;
+                font-size: 16px;
+                line-height: 1.4;
             }
             
             .progress {
@@ -269,52 +273,63 @@
                 right: 10px;
                 font-size: 12px;
             }
+            
+            .navigation {
+                margin-top: 20px;
+                gap: 15px;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 48px;
+            }
         }
 
         @media (max-width: 480px) {
             .wheel-container {
-                padding: 0;
-                min-height: 45vh;
-                margin-left: -15px;
-                margin-right: -15px;
+                padding: 5px;
+                min-height: 40vh;
             }
             
             .sacred-wheel {
-                width: min(75vw, 280px);
-                height: min(75vw, 280px);
+                width: min(90vw, 260px);
+                height: min(90vw, 260px);
             }
             
             .center-node {
-                width: 60px;
-                height: 60px;
-                font-size: 12px;
+                width: 55px;
+                height: 55px;
+                font-size: 11px;
             }
             
             .node {
-                width: 30px;
-                height: 30px;
-                font-size: 10px;
+                width: 28px;
+                height: 28px;
+                font-size: 9px;
             }
             
             .sidebar {
                 padding: 15px;
-                min-height: 250px;
+                min-height: 60vh;
             }
             
             .question-title {
-                font-size: 16px;
-                margin-bottom: 15px;
-                line-height: 1.2;
+                font-size: 18px;
+                margin-bottom: 20px;
+                line-height: 1.3;
             }
             
             .option {
-                padding: 12px 15px;
-                font-size: 14px;
+                padding: 14px 16px;
+                font-size: 15px;
+                margin-bottom: 10px;
             }
             
             .btn {
-                padding: 10px 20px;
-                font-size: 14px;
+                padding: 12px 18px;
+                font-size: 15px;
+                min-height: 44px;
             }
         }
     </style>
@@ -689,9 +704,9 @@
                 `;
             }
 
-            // Add CTA for generating reading (after first question)
+            // Add CTA for generating reading (but not on final question to avoid duplication)
             let ctaHTML = '';
-            if (index > 0 && answers.sunSign) {
+            if (index > 0 && index < questions.length - 1 && answers.sunSign) {
                 const answeredCount = Object.keys(answers).length;
                 ctaHTML = `
                     <div style="margin-top: 30px; padding: 20px; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 8px;">
@@ -967,7 +982,7 @@
             // Replace the sidebar with the horoscope result
             const sidebar = document.querySelector('.sidebar');
             sidebar.innerHTML = `
-                <div style="max-height: 80vh; overflow-y: auto;">
+                <div style="max-height: 70vh; overflow-y: auto;">
                     <h2 style="font-size: 24px; margin-bottom: 20px; color: #7c3aed;">
                         Your ${result.zodiacSign} Reading
                     </h2>
@@ -978,10 +993,72 @@
                         ${result.horoscope}
                     </div>
                 </div>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #333;">
+                    <h3 style="color: #7c3aed; margin-bottom: 15px; font-size: 16px;">Share Your Reading</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button onclick="shareToEmail()" style="background: #4F46E5; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            📧 Email
+                        </button>
+                        <button onclick="shareToInstagram()" style="background: #E4405F; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            📷 Instagram
+                        </button>
+                        <button onclick="shareToTwitter()" style="background: #1DA1F2; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            🐦 X
+                        </button>
+                        <button onclick="shareToFacebook()" style="background: #1877F2; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            📘 Facebook
+                        </button>
+                        <button onclick="copyToClipboard()" style="background: #6B7280; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            📋 Copy
+                        </button>
+                    </div>
                     <button class="btn" onclick="startOver()">Create Another Reading</button>
                 </div>
             `;
+        }
+
+        // Share functions
+        function shareToEmail() {
+            const subject = "My Cosmic Reading";
+            const body = document.querySelector('.sidebar div').textContent;
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink);
+        }
+
+        function shareToInstagram() {
+            // Instagram doesn't support direct URL sharing, so copy to clipboard instead
+            copyToClipboard();
+            alert("✨ Reading copied to clipboard! Paste it into your Instagram story or post.");
+        }
+
+        function shareToTwitter() {
+            const text = "Just got my personalized cosmic reading! ✨🔮";
+            const url = window.location.href;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(twitterUrl, '_blank');
+        }
+
+        function shareToFacebook() {
+            const url = window.location.href;
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            window.open(facebookUrl, '_blank');
+        }
+
+        function copyToClipboard() {
+            const readingText = document.querySelector('.sidebar div').textContent;
+            navigator.clipboard.writeText(readingText).then(() => {
+                alert("📋 Reading copied to clipboard!");
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = readingText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert("📋 Reading copied to clipboard!");
+            });
         }
 
         function startOver() {
