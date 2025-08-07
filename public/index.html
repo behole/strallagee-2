@@ -225,9 +225,8 @@
                 height: min(80vw, 350px);
                 position: relative;
                 margin: 0 auto;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                left: 50%;
+                transform: translateX(-50%);
             }
             
             .center-node {
@@ -277,6 +276,8 @@
             .sacred-wheel {
                 width: min(75vw, 280px);
                 height: min(75vw, 280px);
+                left: 50%;
+                transform: translateX(-50%);
             }
             
             .center-node {
@@ -498,11 +499,9 @@
         function initializeWheel() {
             const wheel = document.getElementById('sacred-wheel');
             
-            // Get responsive wheel dimensions - use computed style for more accuracy
-            const computedStyle = window.getComputedStyle(wheel);
-            const wheelWidth = parseInt(computedStyle.width);
-            const wheelHeight = parseInt(computedStyle.height);
-            const wheelSize = Math.min(wheelWidth, wheelHeight);
+            // Get actual rendered dimensions
+            const rect = wheel.getBoundingClientRect();
+            const wheelSize = Math.min(rect.width, rect.height);
             
             const centerX = wheelSize / 2;
             const centerY = wheelSize / 2;
@@ -523,8 +522,11 @@
 
                 const node = document.createElement('div');
                 node.className = 'node empty';
-                node.style.left = (x - 30) + 'px';
-                node.style.top = (y - 30) + 'px';
+                
+                // Get node size for proper centering
+                const nodeSize = window.innerWidth <= 480 ? 30 : (window.innerWidth <= 768 ? 40 : 60);
+                node.style.left = (x - nodeSize/2) + 'px';
+                node.style.top = (y - nodeSize/2) + 'px';
                 node.textContent = questionIndex + 1;
                 node.dataset.questionIndex = questionIndex;
                 node.onclick = () => goToQuestion(questionIndex);
@@ -549,8 +551,11 @@
 
                 const node = document.createElement('div');
                 node.className = 'node empty';
-                node.style.left = (x - 30) + 'px';
-                node.style.top = (y - 30) + 'px';
+                
+                // Get node size for proper centering
+                const nodeSize = window.innerWidth <= 480 ? 30 : (window.innerWidth <= 768 ? 40 : 60);
+                node.style.left = (x - nodeSize/2) + 'px';
+                node.style.top = (y - nodeSize/2) + 'px';
                 node.textContent = questionIndex + 1;
                 node.dataset.questionIndex = questionIndex;
                 node.onclick = () => goToQuestion(questionIndex);
@@ -651,10 +656,8 @@
             document.querySelectorAll('.connection-line').forEach(line => line.remove());
 
             const wheel = document.getElementById('sacred-wheel');
-            const computedStyle = window.getComputedStyle(wheel);
-            const wheelWidth = parseInt(computedStyle.width);
-            const wheelHeight = parseInt(computedStyle.height);
-            const wheelSize = Math.min(wheelWidth, wheelHeight);
+            const rect = wheel.getBoundingClientRect();
+            const wheelSize = Math.min(rect.width, rect.height);
             const centerX = wheelSize / 2;
             const centerY = wheelSize / 2;
 
@@ -904,17 +907,19 @@
                 document.querySelectorAll('.connection-line').forEach(line => line.remove());
                 nodes = [];
                 
-                // Reinitialize
-                initializeWheel();
-                // Restore answered questions
-                Object.keys(answers).forEach(questionId => {
-                    const questionIndex = questions.findIndex(q => q.id === questionId);
-                    if (questionIndex !== -1) {
-                        updateNodeState(questionIndex);
-                    }
-                });
-                updateConnections();
-            }, 200);
+                // Reinitialize with delay to ensure layout is complete
+                setTimeout(() => {
+                    initializeWheel();
+                    // Restore answered questions
+                    Object.keys(answers).forEach(questionId => {
+                        const questionIndex = questions.findIndex(q => q.id === questionId);
+                        if (questionIndex !== -1) {
+                            updateNodeState(questionIndex);
+                        }
+                    });
+                    updateConnections();
+                }, 50);
+            }, 300);
         });
     </script>
 </body>
