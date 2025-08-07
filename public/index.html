@@ -344,12 +344,12 @@
     </div>
 
     <script>
-        // 16 Survey questions - 8 white (first layer), 8 purple (second layer)
+        // 16 Survey questions - 8 white (cosmic blueprint), 8 purple (inner weather)
         const questions = [
-            // FIRST LAYER - WHITE NODES (Core Questions)
+            // FIRST LAYER - WHITE NODES (🌒 Your Cosmic Blueprint)
             {
-                id: 'zodiac',
-                title: 'Choose your Zodiac Sign',
+                id: 'sunSign',
+                title: '☉ What\'s your sign?',
                 type: 'select',
                 layer: 'white',
                 options: [
@@ -360,137 +360,161 @@
             },
             {
                 id: 'birthDate',
-                title: 'Your Birth Date',
+                title: '📅 Your date of birth',
                 type: 'date',
                 layer: 'white',
                 required: true
             },
             {
-                id: 'heartStatus',
-                title: 'Current Relationship Status',
-                type: 'select',
-                layer: 'white',
-                options: ['single', 'partnered', 'married', 'complicated', 'exploring']
-            },
-            {
-                id: 'vibeCheck',
-                title: 'What energy do you need today?',
-                type: 'select',
-                layer: 'white',
-                options: [
-                    { value: 'encouragement', label: 'Encouragement & positivity' },
-                    { value: 'fire', label: 'Motivation to take action' },
-                    { value: 'reflection', label: 'Deep reflection & wisdom' },
-                    { value: 'sass', label: 'Cosmic sass & straight talk' }
-                ]
-            },
-            {
-                id: 'archetype',
-                title: 'Which archetype resonates with you?',
-                type: 'select',
-                layer: 'white',
-                options: ['warrior', 'sage', 'lover', 'caregiver', 'rebel', 'vulnerable']
-            },
-            {
-                id: 'lengthFormat',
-                title: 'Preferred reading length',
-                type: 'select',
-                layer: 'white',
-                options: [
-                    { value: 'quick', label: 'Quick daily focus' },
-                    { value: 'twoWeeks', label: 'Two-week overview' },
-                    { value: 'detailed', label: 'Detailed nerdy format' }
-                ]
-            },
-            {
-                id: 'currentMood',
-                title: 'How are you feeling today?',
-                type: 'select',
-                layer: 'white',
-                options: [
-                    { value: 'optimistic', label: 'Optimistic & excited' },
-                    { value: 'anxious', label: 'Anxious or worried' },
-                    { value: 'neutral', label: 'Neutral & balanced' },
-                    { value: 'creative', label: 'Creative & inspired' },
-                    { value: 'tired', label: 'Tired or low energy' }
-                ]
-            },
-            {
-                id: 'lifePhase',
-                title: 'What phase of life are you in?',
-                type: 'select',
-                layer: 'white',
-                options: [
-                    { value: 'exploring', label: 'Exploring & discovering' },
-                    { value: 'building', label: 'Building & creating' },
-                    { value: 'transitioning', label: 'In transition' },
-                    { value: 'reflecting', label: 'Reflecting & reassessing' },
-                    { value: 'growing', label: 'Learning & growing' }
-                ]
-            },
-            
-            // SECOND LAYER - PURPLE NODES (Advanced Questions)
-            {
                 id: 'birthTime',
-                title: 'Birth Time (if known)',
-                type: 'time',
-                layer: 'purple'
+                title: '⏰ Your time of birth',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'exact', label: 'Exact time' },
+                    { value: 'approximate', label: 'Approximate time' },
+                    { value: 'unknown', label: 'I don\'t know' }
+                ]
             },
             {
-                id: 'birthplace',
-                title: 'Birth Location',
+                id: 'birthLocation',
+                title: '📍 Your birth location',
                 type: 'text',
-                layer: 'purple',
-                placeholder: 'City, Country'
+                layer: 'white',
+                placeholder: 'City + Country'
             },
             {
                 id: 'currentLocation',
-                title: 'Current Location',
+                title: '🗺 Where are you currently living?',
                 type: 'text',
-                layer: 'purple',
-                placeholder: 'City, Country'
-            },
-            {
-                id: 'sexAssigned',
-                title: 'Sex Assigned at Birth',
-                type: 'select',
-                layer: 'purple',
-                options: ['female', 'male', 'intersex', 'prefer not to say']
+                layer: 'white',
+                placeholder: 'City + Country'
             },
             {
                 id: 'genderIdentity',
-                title: 'Preferred Pronouns',
+                title: '💫 How do you identify?',
                 type: 'text',
-                layer: 'purple',
-                placeholder: 'they/them, she/her, he/him, etc.'
+                layer: 'white',
+                placeholder: 'Gender identity'
             },
             {
-                id: 'spiritualPractice',
-                title: 'Spiritual or mindfulness practices',
+                id: 'cosmicDepth',
+                title: '🔮 How deep do you want to go?',
                 type: 'select',
-                layer: 'purple',
+                layer: 'white',
                 options: [
-                    { value: 'meditation', label: 'Meditation' },
-                    { value: 'yoga', label: 'Yoga' },
-                    { value: 'prayer', label: 'Prayer' },
-                    { value: 'journaling', label: 'Journaling' },
-                    { value: 'nature', label: 'Time in nature' },
-                    { value: 'none', label: 'None currently' }
+                    { value: 'light', label: 'Keep it light ✨' },
+                    { value: 'truth', label: 'Hit me with truth 🔥' },
+                    { value: 'shadows', label: 'Show me the shadows 🖤' }
                 ]
             },
             {
-                id: 'challengesFacing',
-                title: 'What challenges are you currently facing?',
-                type: 'textarea',
+                id: 'guideVibe',
+                title: '👁️ Pick your guide\'s vibe for today',
+                type: 'select',
+                layer: 'white',
+                options: [
+                    { value: 'nurturing', label: 'Nurturing & gentle' },
+                    { value: 'intuitive', label: 'Intuitive & poetic' },
+                    { value: 'playful', label: 'Playful & bold' },
+                    { value: 'direct', label: 'Clear & direct' },
+                    { value: 'cosmic-clown', label: 'Meme-ified & cosmic clown' },
+                    { value: 'surprise', label: 'Surprise me' }
+                ]
+            },
+            
+            // SECOND LAYER - PURPLE NODES (🌕 Your Inner Weather)
+            {
+                id: 'innerStirring',
+                title: '💭 What\'s stirring inside you lately?',
+                type: 'select',
                 layer: 'purple',
-                placeholder: 'Career, relationships, personal growth, health, etc.'
+                options: [
+                    { value: 'pattern', label: 'A repeating pattern I can\'t shake' },
+                    { value: 'heartache', label: 'Heartache or love confusion' },
+                    { value: 'stuck', label: 'Feeling stuck or unsure of my path' },
+                    { value: 'decision', label: 'A big decision ahead' },
+                    { value: 'self-doubt', label: 'Self-doubt or inner critic overload' },
+                    { value: 'everything', label: 'Just… everything 😩' },
+                    { value: 'unsure', label: 'Not sure, I just need something' }
+                ]
             },
             {
-                id: 'goalsAndIntentions',
-                title: 'Current Goals & Intentions',
+                id: 'heartState',
+                title: '❤️ How\'s your heart doing today?',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    { value: 'tender', label: 'Tender' },
+                    { value: 'guarded', label: 'Guarded' },
+                    { value: 'open', label: 'Wide open' },
+                    { value: 'curious', label: 'Curious' },
+                    { value: 'elsewhere', label: 'Somewhere else entirely' }
+                ]
+            },
+            {
+                id: 'seekingClarity',
+                title: '🌈 What are you craving clarity on?',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    { value: 'purpose', label: 'My soul\'s purpose' },
+                    { value: 'next-steps', label: 'What\'s next in my journey' },
+                    { value: 'patterns', label: 'My patterns + how to shift them' },
+                    { value: 'love', label: 'Love, romance, or connection' },
+                    { value: 'boundaries', label: 'Boundaries + balance' },
+                    { value: 'power', label: 'My power' }
+                ]
+            },
+            {
+                id: 'loveInterestSign',
+                title: '💕 What sign is your current crush, situationship, or love interest?',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+                    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+                    'I don\'t know', 'None'
+                ]
+            },
+            {
+                id: 'supportTone',
+                title: '🪞 What kind of support feels good right now?',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    { value: 'affirming', label: 'Affirming + soft' },
+                    { value: 'tough-love', label: 'Truthful + tough love' },
+                    { value: 'spiritual', label: 'Spiritual + symbolic' },
+                    { value: 'practical', label: 'Grounded + practical' }
+                ]
+            },
+            {
+                id: 'inFlux',
+                title: '🌀 What part of you feels most in flux?',
+                type: 'select',
+                layer: 'purple',
+                options: [
+                    { value: 'identity', label: 'My identity' },
+                    { value: 'career', label: 'My career or calling' },
+                    { value: 'relationships', label: 'My relationships' },
+                    { value: 'self-worth', label: 'My self-worth' },
+                    { value: 'energy', label: 'My energy' }
+                ]
+            },
+            {
+                id: 'avoidingTruth',
+                title: 'What do you already know that you\'ve been avoiding?',
                 type: 'textarea',
                 layer: 'purple',
-                placeholder: 'What are you working on in your life right now?'
+                placeholder: 'Trust your instincts...'
+            },
+            {
+                id: 'seasonWish',
+                title: '💫 If you had one wish for yourself this season, what would it be?',
+                type: 'textarea',
+                layer: 'purple',
+                placeholder: 'What are you calling in?'
             }
         ];
 
@@ -764,7 +788,7 @@
 
         async function generateHoroscope() {
             // Check if required fields are filled
-            if (!answers.zodiac || !answers.birthDate) {
+            if (!answers.sunSign || !answers.birthDate) {
                 alert('Please fill in your zodiac sign and birth date to generate a horoscope.');
                 return;
             }
@@ -785,27 +809,27 @@
                     },
                     required: {
                         dateOfBirth: answers.birthDate,
-                        zodiacSign: answers.zodiac
+                        zodiacSign: answers.sunSign
                     },
                     optional: {
-                        timeOfBirth: answers.birthTime,
-                        birthplace: answers.birthplace,
+                        birthTime: answers.birthTime,
+                        birthLocation: answers.birthLocation,
                         currentLocation: answers.currentLocation,
-                        sexAssigned: answers.sexAssigned,
                         genderIdentity: answers.genderIdentity
                     },
                     preferences: {
-                        lengthFormat: answers.lengthFormat,
-                        heartStatus: answers.heartStatus,
-                        vibeCheck: answers.vibeCheck,
-                        archetype: answers.archetype
+                        cosmicDepth: answers.cosmicDepth,
+                        guideVibe: answers.guideVibe,
+                        supportTone: answers.supportTone
                     },
                     context: {
-                        goalsAndIntentions: answers.goalsAndIntentions,
-                        currentMood: answers.currentMood,
-                        lifePhase: answers.lifePhase,
-                        spiritualPractice: answers.spiritualPractice,
-                        challengesFacing: answers.challengesFacing
+                        innerStirring: answers.innerStirring,
+                        heartState: answers.heartState,
+                        seekingClarity: answers.seekingClarity,
+                        loveInterestSign: answers.loveInterestSign,
+                        inFlux: answers.inFlux,
+                        avoidingTruth: answers.avoidingTruth,
+                        seasonWish: answers.seasonWish
                     }
                 };
 

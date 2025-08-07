@@ -60,53 +60,58 @@ function buildPrompt(userData) {
     
     // Optional astrological data
     if (Object.keys(optional).length > 0) {
-        prompt += `**Astrological Details:**\n`;
-        if (optional.timeOfBirth) prompt += `- Birth Time: ${optional.timeOfBirth} (use for rising sign and houses)\n`;
-        if (optional.birthplace) prompt += `- Birthplace: ${optional.birthplace}\n`;
-        if (optional.currentLocation) prompt += `- Current Location: ${optional.currentLocation} (for transits)\n`;
-        if (optional.sexAssigned) prompt += `- Sex Assigned at Birth: ${optional.sexAssigned}\n`;
-        if (optional.genderIdentity) prompt += `- Pronouns/Identity: ${optional.genderIdentity}\n`;
+        prompt += `**Cosmic Blueprint Details:**\n`;
+        if (optional.birthTime) prompt += `- Birth Time Knowledge: ${optional.birthTime}\n`;
+        if (optional.birthLocation) prompt += `- Birth Location: ${optional.birthLocation}\n`;
+        if (optional.currentLocation) prompt += `- Current Location: ${optional.currentLocation}\n`;
+        if (optional.genderIdentity) prompt += `- Gender Identity: ${optional.genderIdentity}\n`;
         prompt += `\n`;
     }
     
-    // Preferences for tone and style
+    // Guide and tone preferences
     if (Object.keys(preferences).length > 0) {
-        prompt += `**Reading Preferences:**\n`;
-        if (preferences.lengthFormat) {
-            const formatMap = {
-                'quick': 'Quick daily focus - what\'s happening TODAY',
-                'twoWeeks': 'Two-week overview with key themes',
-                'detailed': 'Long, detailed nerdy format with full astrological context'
+        prompt += `**Guide & Tone Preferences:**\n`;
+        if (preferences.cosmicDepth) {
+            const depthMap = {
+                'light': 'Keep it light and uplifting ✨',
+                'truth': 'Hit me with the truth, no sugar-coating 🔥',
+                'shadows': 'Show me the shadows and deeper work 🖤'
             };
-            prompt += `- Format: ${formatMap[preferences.lengthFormat]}\n`;
+            prompt += `- Depth Level: ${depthMap[preferences.cosmicDepth]}\n`;
         }
-        if (preferences.heartStatus) prompt += `- Relationship Status: ${preferences.heartStatus}\n`;
-        if (preferences.vibeCheck) {
-            const vibeMap = {
-                'encouragement': 'Needs encouragement and positive energy',
-                'fire': 'Needs motivation and a kick into gear',
-                'reflection': 'Wants soulful reflection and depth',
-                'sass': 'Wants cosmic sass and straight talk'
+        if (preferences.guideVibe) {
+            const guideMap = {
+                'nurturing': 'Nurturing & gentle approach',
+                'intuitive': 'Intuitive & poetic language',
+                'playful': 'Playful & bold energy',
+                'direct': 'Clear & direct communication',
+                'cosmic-clown': 'Meme-ified & cosmic clown humor',
+                'surprise': 'Surprise me with your style'
             };
-            prompt += `- Desired Vibe: ${vibeMap[preferences.vibeCheck]}\n`;
+            prompt += `- Guide Style: ${guideMap[preferences.guideVibe]}\n`;
         }
-        if (preferences.archetype) prompt += `- Personality Archetype: ${preferences.archetype}\n`;
-        if (preferences.preferredGuru) prompt += `- Preferred Astrology Style: ${preferences.preferredGuru}\n`;
+        if (preferences.supportTone) {
+            const supportMap = {
+                'affirming': 'Affirming & soft support',
+                'tough-love': 'Truthful & tough love',
+                'spiritual': 'Spiritual & symbolic guidance',
+                'practical': 'Grounded & practical advice'
+            };
+            prompt += `- Support Style: ${supportMap[preferences.supportTone]}\n`;
+        }
         prompt += `\n`;
     }
     
-    // Goals and context
-    if (context.goalsAndIntentions) {
-        prompt += `**Current Goals & Intentions:**\n${context.goalsAndIntentions}\n\n`;
-    }
-    
-    // Additional context from sacred geometry form
-    if (context.currentMood || context.lifePhase || context.spiritualPractice || context.challengesFacing) {
-        prompt += `**Additional Context:**\n`;
-        if (context.currentMood) prompt += `- Current Mood: ${context.currentMood}\n`;
-        if (context.lifePhase) prompt += `- Life Phase: ${context.lifePhase}\n`;
-        if (context.spiritualPractice) prompt += `- Spiritual Practice: ${context.spiritualPractice}\n`;
-        if (context.challengesFacing) prompt += `- Current Challenges: ${context.challengesFacing}\n`;
+    // Inner weather and emotional context
+    if (Object.keys(context).length > 0) {
+        prompt += `**Inner Weather & Current State:**\n`;
+        if (context.innerStirring) prompt += `- What's stirring inside: ${context.innerStirring}\n`;
+        if (context.heartState) prompt += `- Heart state today: ${context.heartState}\n`;
+        if (context.seekingClarity) prompt += `- Seeking clarity on: ${context.seekingClarity}\n`;
+        if (context.loveInterestSign) prompt += `- Love interest's sign: ${context.loveInterestSign}\n`;
+        if (context.inFlux) prompt += `- Most in flux: ${context.inFlux}\n`;
+        if (context.avoidingTruth) prompt += `- Truth being avoided: ${context.avoidingTruth}\n`;
+        if (context.seasonWish) prompt += `- Wish for this season: ${context.seasonWish}\n`;
         prompt += `\n`;
     }
     
@@ -124,7 +129,7 @@ function buildPrompt(userData) {
         prompt += `With maximum data, create a deeply personalized reading that addresses their specific goals, uses their preferred style, and incorporates all astrological details.`;
     }
     
-    prompt += `\n\nGenerate a horoscope that feels specifically written for this person. Match their requested vibe and format. Be insightful, authentic, and avoid generic advice.`;
+    prompt += `\n\nGenerate a horoscope that feels specifically written for this person. Match their cosmic depth preference, guide style, and support tone. Address what they're seeking clarity on and what's stirring inside them. Be insightful, authentic, and avoid generic advice. Use their preferred communication style from the guide vibe selection.`;
     
     return prompt;
 }
