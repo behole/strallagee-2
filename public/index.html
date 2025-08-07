@@ -665,10 +665,48 @@
                             You're about to embark on a personalized horoscope experience. As you answer questions, 
                             watch the sacred geometry wheel come alive with connections and patterns.
                         </p>
-                        <p style="color: #ccc; line-height: 1.6; margin-bottom: 0;">
+                        <p style="color: #ccc; line-height: 1.6; margin-bottom: 15px;">
                             <strong>✨ The more nodes you complete, the more personalized and insightful your reading becomes.</strong> 
                             Only your zodiac sign is required - everything else helps us craft a deeper, more meaningful cosmic guidance just for you.
                         </p>
+                        
+                        <details style="margin-top: 20px;">
+                            <summary style="color: #7c3aed; cursor: pointer; font-weight: bold; margin-bottom: 10px;">🔮 Preview All 16 Nodes</summary>
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 6px;">
+                                <div style="color: #fff; font-weight: bold; margin-bottom: 10px;">🌒 Cosmic Blueprint (White Nodes):</div>
+                                <div style="color: #ccc; font-size: 14px; line-height: 1.4; margin-bottom: 15px;">
+                                    1. ☉ Zodiac sign • 2. 📅 Birth date • 3. ⏰ Birth time • 4. 📍 Birth location<br>
+                                    5. 🗺 Current location • 6. 💫 Gender identity • 7. 🔮 Cosmic depth • 8. 👁️ Guide style
+                                </div>
+                                <div style="color: #fff; font-weight: bold; margin-bottom: 10px;">🌕 Inner Weather (Purple Nodes):</div>
+                                <div style="color: #ccc; font-size: 14px; line-height: 1.4;">
+                                    9. 💭 What's stirring • 10. ❤️ Heart state • 11. 🌈 Seeking clarity • 12. 💕 Love interest<br>
+                                    13. 🪞 Support tone • 14. 🌀 What's in flux • 15. Hidden truth • 16. 💫 Season wish
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                `;
+            }
+
+            // Add CTA for generating reading (after first question)
+            let ctaHTML = '';
+            if (index > 0 && answers.sunSign) {
+                const answeredCount = Object.keys(answers).length;
+                ctaHTML = `
+                    <div style="margin-top: 30px; padding: 20px; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 8px;">
+                        <p style="color: #ccc; margin-bottom: 15px; font-size: 14px;">
+                            ✨ Ready for your reading? You've completed <strong>${answeredCount} node${answeredCount > 1 ? 's' : ''}</strong> - 
+                            or continue adding more for deeper insights.
+                        </p>
+                        <button 
+                            onclick="generateHoroscope()" 
+                            style="background: #7c3aed; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;"
+                            onmouseover="this.style.background='#6d28d9'" 
+                            onmouseout="this.style.background='#7c3aed'"
+                        >
+                            🔮 Generate My Reading
+                        </button>
                     </div>
                 `;
             }
@@ -678,6 +716,7 @@
                     ${onboardingHTML}
                     <div class="question-title">${question.title}</div>
                     <div class="question-options">${optionsHTML}</div>
+                    ${ctaHTML}
                 </div>
             `;
 
