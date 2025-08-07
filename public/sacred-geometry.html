@@ -209,12 +209,14 @@
             .wheel-container {
                 flex: 1;
                 min-height: 50vh;
-                padding: 20px 10px;
+                padding: 20px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 position: relative;
                 width: 100%;
+                max-width: 100vw;
+                box-sizing: border-box;
                 overflow: visible;
             }
             
@@ -268,7 +270,7 @@
 
         @media (max-width: 480px) {
             .wheel-container {
-                padding: 15px 5px;
+                padding: 15px;
                 min-height: 45vh;
             }
             
