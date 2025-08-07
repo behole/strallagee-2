@@ -113,7 +113,9 @@
             padding: 40px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            max-height: 100vh;
         }
         
         .question-container {
@@ -362,19 +364,22 @@
                 id: 'birthDate',
                 title: '📅 Your date of birth',
                 type: 'date',
-                layer: 'white',
-                required: true
+                layer: 'white'
             },
             {
                 id: 'birthTime',
                 title: '⏰ Your time of birth',
-                type: 'select',
+                type: 'conditional',
                 layer: 'white',
                 options: [
-                    { value: 'exact', label: 'Exact time' },
-                    { value: 'approximate', label: 'Approximate time' },
+                    { value: 'exact', label: 'I know the exact time' },
+                    { value: 'approximate', label: 'I know approximately' },
                     { value: 'unknown', label: 'I don\'t know' }
-                ]
+                ],
+                followUp: {
+                    'exact': { type: 'time', placeholder: 'Enter exact time' },
+                    'approximate': { type: 'text', placeholder: 'e.g., "morning", "afternoon", "evening"' }
+                }
             },
             {
                 id: 'birthLocation',
@@ -618,6 +623,24 @@
                     const selected = answers[question.id] === value ? 'selected' : '';
                     optionsHTML += `<div class="option ${selected}" onclick="selectOption('${question.id}', '${value}')">${label}</div>`;
                 });
+            } else if (question.type === 'conditional' && question.options) {
+                question.options.forEach(option => {
+                    const value = typeof option === 'object' ? option.value : option;
+                    const label = typeof option === 'object' ? option.label : option;
+                    const selected = answers[question.id] === value ? 'selected' : '';
+                    optionsHTML += `<div class="option ${selected}" onclick="selectConditionalOption('${question.id}', '${value}', ${JSON.stringify(question.followUp || {}).replace(/"/g, '&quot;')})">${label}</div>`;
+                });
+                
+                // Add follow-up input if option is selected
+                if (answers[question.id] && question.followUp && question.followUp[answers[question.id]]) {
+                    const followUp = question.followUp[answers[question.id]];
+                    const followUpValue = answers[question.id + '_detail'] || '';
+                    if (followUp.type === 'time') {
+                        optionsHTML += `<div style="margin-top: 20px;"><input type="time" value="${followUpValue}" placeholder="${followUp.placeholder || ''}" onchange="selectOption('${question.id}_detail', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;"></div>`;
+                    } else if (followUp.type === 'text') {
+                        optionsHTML += `<div style="margin-top: 20px;"><input type="text" value="${followUpValue}" placeholder="${followUp.placeholder || ''}" onchange="selectOption('${question.id}_detail', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;"></div>`;
+                    }
+                }
             } else if (question.type === 'date') {
                 const value = answers[question.id] || '';
                 optionsHTML = `<input type="date" value="${value}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">`;
@@ -632,8 +655,27 @@
                 optionsHTML = `<textarea rows="4" placeholder="${question.placeholder || ''}" onchange="selectOption('${question.id}', this.value)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; resize: vertical;">${value}</textarea>`;
             }
 
+            // Add onboarding message for first question
+            let onboardingHTML = '';
+            if (index === 0) {
+                onboardingHTML = `
+                    <div style="background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                        <h3 style="color: #7c3aed; margin-bottom: 15px; font-size: 18px;">🌟 Welcome to Your Cosmic Journey</h3>
+                        <p style="color: #ccc; line-height: 1.6; margin-bottom: 15px;">
+                            You're about to embark on a personalized horoscope experience. As you answer questions, 
+                            watch the sacred geometry wheel come alive with connections and patterns.
+                        </p>
+                        <p style="color: #ccc; line-height: 1.6; margin-bottom: 0;">
+                            <strong>✨ The more nodes you complete, the more personalized and insightful your reading becomes.</strong> 
+                            Only your zodiac sign is required - everything else helps us craft a deeper, more meaningful cosmic guidance just for you.
+                        </p>
+                    </div>
+                `;
+            }
+
             container.innerHTML = `
                 <div class="question-container active">
+                    ${onboardingHTML}
                     <div class="question-title">${question.title}</div>
                     <div class="question-options">${optionsHTML}</div>
                 </div>
@@ -645,20 +687,35 @@
 
         function selectOption(questionId, value) {
             answers[questionId] = value;
+            const questionIndex = questions.findIndex(q => q.id === questionId.replace('_detail', ''));
+            if (questionIndex !== -1) {
+                updateNodeState(questionIndex);
+                updateConnections();
+            }
+            updateProgress();
+
+            // Auto-advance for select options (but not for conditional detail inputs)
+            if (!questionId.includes('_detail')) {
+                const question = questions[questionIndex];
+                if (question.type === 'select') {
+                    setTimeout(() => {
+                        if (currentQuestionIndex < questions.length - 1) {
+                            nextQuestion();
+                        }
+                    }, 500);
+                }
+            }
+        }
+
+        function selectConditionalOption(questionId, value, followUpConfig) {
+            answers[questionId] = value;
             const questionIndex = questions.findIndex(q => q.id === questionId);
             updateNodeState(questionIndex);
             updateConnections();
             updateProgress();
 
-            // Auto-advance for select options
-            const question = questions[questionIndex];
-            if (question.type === 'select') {
-                setTimeout(() => {
-                    if (currentQuestionIndex < questions.length - 1) {
-                        nextQuestion();
-                    }
-                }, 500);
-            }
+            // Reload the question to show follow-up input if needed
+            loadQuestion(currentQuestionIndex);
         }
 
         function updateNodeState(questionIndex) {
@@ -788,8 +845,8 @@
 
         async function generateHoroscope() {
             // Check if required fields are filled
-            if (!answers.sunSign || !answers.birthDate) {
-                alert('Please fill in your zodiac sign and birth date to generate a horoscope.');
+            if (!answers.sunSign) {
+                alert('Please fill in your zodiac sign to generate a horoscope.');
                 return;
             }
 

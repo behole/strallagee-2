@@ -140,9 +140,9 @@ app.post('/api/generate-horoscope', async (req, res) => {
         const userData = req.body;
         
         // Validate required data
-        if (!userData.required?.dateOfBirth) {
+        if (!userData.required?.zodiacSign) {
             return res.status(400).json({ 
-                error: 'Date of birth is required' 
+                error: 'Zodiac sign is required' 
             });
         }
         
