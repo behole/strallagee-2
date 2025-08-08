@@ -8,8 +8,8 @@ const app = express();
 
    // ---- Early exit if API key missing ----
    if (!process.env.CLAUDE_API_KEY) {
-     console.error('❌ CLAUDE_API_KEY is not defined. Add it to .env and restart.');
-     process.exit(1);
+     console.warn('⚠️  CLAUDE_API_KEY is not defined. Server will start but horoscope generation will fail.');
+     console.log('   Add your Claude API key to .env for full functionality');
    }
 
    // ---- CORS configuration ----
@@ -252,3 +252,4 @@ const app = express();
        }
      });
    }
+
