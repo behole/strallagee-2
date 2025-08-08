@@ -1004,16 +1004,31 @@
         function displayHoroscope(result) {
             // Replace the sidebar with the horoscope result
             const sidebar = document.querySelector('.sidebar');
-            sidebar.innerHTML = `
-                <div style="overflow-y: auto; max-height: 100vh; padding-bottom: 20px;">
-                    <h2 style="font-size: 24px; margin-bottom: 20px; color: #7c3aed;">
-                        Your ${result.zodiacSign} Reading
-                    </h2>
-                    <div style="color: #999; font-size: 14px; margin-bottom: 20px;">
-                        Data Level: ${result.dataLevel}/16 • Generated: ${new Date(result.generatedAt).toLocaleString()}
-                    </div>
-                    <div style="line-height: 1.6; font-size: 16px; white-space: pre-wrap; margin-bottom: 40px;">
-                        ${result.horoscope}
+            
+            // Clear sidebar safely
+            sidebar.textContent = '';
+            
+            // Create main container
+            const mainContainer = document.createElement('div');
+            mainContainer.style.cssText = 'overflow-y: auto; max-height: 100vh; padding-bottom: 20px;';
+            
+            // Create title
+            const title = document.createElement('h2');
+            title.style.cssText = 'font-size: 24px; margin-bottom: 20px; color: #7c3aed;';
+            title.textContent = `Your ${result.zodiacSign} Reading`;
+            mainContainer.appendChild(title);
+            
+            // Create metadata
+            const metadata = document.createElement('div');
+            metadata.style.cssText = 'color: #999; font-size: 14px; margin-bottom: 20px;';
+            metadata.textContent = `Data Level: ${result.dataLevel}/16 • Generated: ${new Date(result.generatedAt).toLocaleString()}`;
+            mainContainer.appendChild(metadata);
+            
+            // Create horoscope content (safely handle user content)
+            const horoscopeContent = document.createElement('div');
+            horoscopeContent.style.cssText = 'line-height: 1.6; font-size: 16px; white-space: pre-wrap; margin-bottom: 40px;';
+            horoscopeContent.textContent = result.horoscope; // Use textContent to prevent XSS
+            mainContainer.appendChild(horoscopeContent);
                     </div>
                     
                     <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid #333;">
@@ -1146,4 +1161,5 @@
     </script>
 </body>
 </html>
+
 
