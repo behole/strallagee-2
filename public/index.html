@@ -1113,19 +1113,43 @@
             // Clear connections
             document.querySelectorAll('.connection-line').forEach(line => line.remove());
             
-            // Reset sidebar
+            // Reset sidebar safely
             const sidebar = document.querySelector('.sidebar');
-            sidebar.innerHTML = `
-                <div id="questions-container">
-                    <!-- Questions will be loaded here -->
-                </div>
-                
-                <div class="navigation">
-                    <button class="btn" id="prev-btn" onclick="previousQuestion()">PREV</button>
-                    <button class="btn" id="next-btn" onclick="nextQuestion()">NEXT</button>
-                    <button class="btn primary" id="go-btn" onclick="generateHoroscope()" style="display: none;">GO →</button>
-                </div>
-            `;
+            sidebar.textContent = '';
+            
+            // Create questions container
+            const questionsContainer = document.createElement('div');
+            questionsContainer.id = 'questions-container';
+            sidebar.appendChild(questionsContainer);
+            
+            // Create navigation container
+            const navigation = document.createElement('div');
+            navigation.className = 'navigation';
+            
+            // Create navigation buttons
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'btn';
+            prevBtn.id = 'prev-btn';
+            prevBtn.textContent = 'PREV';
+            prevBtn.onclick = previousQuestion;
+            navigation.appendChild(prevBtn);
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'btn';
+            nextBtn.id = 'next-btn';
+            nextBtn.textContent = 'NEXT';
+            nextBtn.onclick = nextQuestion;
+            navigation.appendChild(nextBtn);
+            
+            const goBtn = document.createElement('button');
+            goBtn.className = 'btn primary';
+            goBtn.id = 'go-btn';
+            goBtn.textContent = 'GO →';
+            goBtn.style.display = 'none';
+            goBtn.onclick = generateHoroscope;
+            navigation.appendChild(goBtn);
+            
+            sidebar.appendChild(navigation);
             
             // Restart the survey
             loadQuestion(0);
@@ -1161,5 +1185,6 @@
     </script>
 </body>
 </html>
+
 
 
