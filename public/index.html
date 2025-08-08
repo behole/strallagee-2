@@ -967,7 +967,14 @@
                     }
                 };
 
-                console.log('Generating horoscope with data:', userData);
+                // Validate user data before sending
+                const validation = validateUserData(userData);
+                if (!validation.isValid) {
+                    alert('Validation errors: ' + validation.errors.join(', '));
+                    return;
+                }
+                
+                console.log('Generating horoscope with validated data:', validation.sanitizedData);
 
                 // Call the existing horoscope generation API
                 const response = await fetch('/api/generate-horoscope', {
@@ -975,7 +982,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify(validation.sanitizedData)
                 });
 
                 if (!response.ok) {
@@ -1245,6 +1252,7 @@
     </script>
 </body>
 </html>
+
 
 
 
