@@ -1056,6 +1056,66 @@
             `;
         }
 
+        // Input validation functions
+        function validateUserData(userData) {
+            const errors = [];
+            
+            // Validate required fields
+            if (!userData.required.zodiacSign) {
+                errors.push('Zodiac sign is required');
+            }
+            
+            // Validate zodiac sign against allowed values
+            const validZodiacSigns = [
+                'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+                'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+            ];
+            if (userData.required.zodiacSign && !validZodiacSigns.includes(userData.required.zodiacSign)) {
+                errors.push('Invalid zodiac sign');
+            }
+            
+            // Validate date format if provided
+            if (userData.required.dateOfBirth) {
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(userData.required.dateOfBirth)) {
+                    errors.push('Invalid date format for birth date');
+                }
+            }
+            
+            // Validate data richness level
+            if (userData.dataRichness && (userData.dataRichness.level < 0 || userData.dataRichness.level > 16)) {
+                errors.push('Invalid data richness level');
+            }
+            
+            // Sanitize string inputs
+            const sanitizeString = (str) => {
+                if (typeof str !== 'string') return str;
+                return str.replace(/[<>\"'&]/g, '').trim().substring(0, 1000); // Remove dangerous chars and limit length
+            };
+            
+            // Sanitize all string values in the userData object
+            const sanitizeObject = (obj) => {
+                if (!obj || typeof obj !== 'object') return obj;
+                const sanitized = {};
+                for (const [key, value] of Object.entries(obj)) {
+                    if (typeof value === 'string') {
+                        sanitized[key] = sanitizeString(value);
+                    } else if (typeof value === 'object' && value !== null) {
+                        sanitized[key] = sanitizeObject(value);
+                    } else {
+                        sanitized[key] = value;
+                    }
+                }
+                return sanitized;
+            };
+            
+            return {
+                isValid: errors.length === 0,
+                errors: errors,
+                sanitizedData: sanitizeObject(userData)
+            };
+        }
+
         // Share functions
         function shareToEmail() {
             const subject = "My Cosmic Reading";
@@ -1185,6 +1245,7 @@
     </script>
 </body>
 </html>
+
 
 
 
