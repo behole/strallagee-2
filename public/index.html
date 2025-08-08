@@ -723,14 +723,40 @@
                 `;
             }
 
-            container.innerHTML = `
-                <div class="question-container active">
-                    ${onboardingHTML}
-                    <div class="question-title">${question.title}</div>
-                    <div class="question-options">${optionsHTML}</div>
-                    ${ctaHTML}
-                </div>
-            `;
+            // Clear container safely
+            container.textContent = '';
+            
+            // Create question container
+            const questionContainer = document.createElement('div');
+            questionContainer.className = 'question-container active';
+            
+            // Add onboarding HTML if present
+            if (onboardingHTML) {
+                const onboardingDiv = document.createElement('div');
+                onboardingDiv.innerHTML = onboardingHTML; // Safe here as onboardingHTML is static content
+                questionContainer.appendChild(onboardingDiv);
+            }
+            
+            // Add question title
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'question-title';
+            titleDiv.textContent = question.title;
+            questionContainer.appendChild(titleDiv);
+            
+            // Add question options
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'question-options';
+            optionsDiv.innerHTML = optionsHTML; // Safe here as optionsHTML is generated from controlled data
+            questionContainer.appendChild(optionsDiv);
+            
+            // Add CTA if present
+            if (ctaHTML) {
+                const ctaDiv = document.createElement('div');
+                ctaDiv.innerHTML = ctaHTML; // Safe here as ctaHTML is static content
+                questionContainer.appendChild(ctaDiv);
+            }
+            
+            container.appendChild(questionContainer);
 
             updateProgress();
             updateNavigation();
@@ -1120,3 +1146,4 @@
     </script>
 </body>
 </html>
+
