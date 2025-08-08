@@ -1,258 +1,234 @@
-// server.js
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+js
+   const express = require('express');
+   const cors = require('cors');
+   const path = require('path');
+   require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+   const app = express();
+   const PORT = process.env.PORT || 3000;
 
-// Early exit if Claude API key is missing
-if (!process.env.CLAUDE_API_KEY) {
-  console.error('❌  CLAUDE_API_KEY is not defined. Please add it to .env and restart.');
-  process.exit(1);
-}
+   // ---- Early exit if API key missing ----
+   if (!process.env.CLAUDE_API_KEY) {
+     console.error('❌ CLAUDE_API_KEY is not defined. Add it to .env and restart.');
+     process.exit(1);
+   }
 
-// Middleware
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://your-production-domain.com'] // TODO: replace with real domain(s)
-  : ['http://localhost:3000'];
+   // ---- CORS configuration ----
+   const allowedOrigins =
+     process.env.NODE_ENV === 'production'
+       ? ['https://your-production-domain.com'] // ← replace with real domain(s)
+       : ['http://localhost:3000'];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow non‑browser tools (e.g., curl, postman) with no origin header
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error('Not allowed by CORS'), false);
-    },
-  })
-);
+   app.use(
+     cors({
+       origin: (origin, cb) => {
+         if (!origin) return cb(null, true);
+         if (allowedOrigins.includes(origin)) return cb(null, true);
+         return cb(new Error('Not allowed by CORS'), false);
+       },
+     })
+   );
 
-app.use(express.json());
-app.use(express.static('public')); // Serve your HTML file from public folder
+   app.use(express.json());
+   app.use(express.static('public'));
 
-// Claude API integration
-// Simple sanitiser – removes line breaks and trims whitespace
-function sanitize(value) {
-  if (typeof value !== 'string') return '';
-  return value.replace(/[\r\n]+/g, ' ').trim();
-}
+   // ---- Simple sanitiser ----
+   function sanitize(value) {
+     if (typeof value !== 'string') return '';
+     return value.replace(/[\r\n]+/g, ' ').trim();
+   }
 
-// Generate horoscope with timeout handling
-async function generateHoroscope(userData) {
-  const prompt = buildPrompt(userData);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000); // 15 seconds
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': process.env.CLAUDE_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+   // ---- Prompt builder (unchanged) ----
+   function buildPrompt(userData) {
+     const { dataRichness, required, optional, preferences, context } = userData;
+     const today = new Date().toLocaleDateString('en-US', {
+       year: 'numeric',
+       month: 'long',
+       day: 'numeric',
+     });
+     let prompt = `You are a skilled astrologer creating a personalized horoscope for today, ${today}. Here's what you know about this
+   person:\n\n`;
 
-    if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status}`);
-    }
+     // Required info
+     prompt += `**Core Info:**\n`;
+     prompt += `- Date of Birth: ${required.dateOfBirth}\n`;
+     prompt += `- Zodiac Sign: ${required.zodiacSign}\n\n`;
 
-    const data = await response.json();
-    return data.content[0].text;
-  } catch (error) {
-    console.error('Error calling Claude API:', error);
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
+     // Optional data
+     if (Object.keys(optional).length) {
+       prompt += `**Cosmic Blueprint Details:**\n`;
+       if (optional.birthTime) prompt += `- Birth Time Knowledge: ${optional.birthTime}\n`;
+       if (optional.birthLocation) prompt += `- Birth Location: ${optional.birthLocation}\n`;
+       if (optional.currentLocation) prompt += `- Current Location: ${optional.currentLocation}\n`;
+       if (optional.genderIdentity) prompt += `- Gender Identity: ${optional.genderIdentity}\n`;
+       prompt += `\n`;
+     }
 
+     // Preferences
+     if (Object.keys(preferences).length) {
+       prompt += `**Guide & Tone Preferences:**\n`;
+       if (preferences.cosmicDepth) {
+         const depthMap = {
+           light: 'Keep it light and uplifting ✨',
+           truth: 'Hit me with the truth, no sugar‑coating 🔥',
+           shadows: 'Show me the shadows and deeper work 🖤',
+         };
+         prompt += `- Depth Level: ${depthMap[preferences.cosmicDepth]}\n`;
+       }
+       if (preferences.guideVibe) {
+         const guideMap = {
+           nurturing: 'Nurturing & gentle approach',
+           intuitive: 'Intuitive & poetic language',
+           playful: 'Playful & bold energy',
+           direct: 'Clear & direct communication',
+           'cosmic-clown': 'Meme‑ified & cosmic clown humor',
+           surprise: 'Surprise me with your style',
+         };
+         prompt += `- Guide Style: ${guideMap[preferences.guideVibe]}\n`;
+       }
+       if (preferences.supportTone) {
+         const supportMap = {
+           affirming: 'Affirming & soft support',
+           'tough-love': 'Truthful & tough love',
+           spiritual: 'Spiritual & symbolic guidance',
+           practical: 'Grounded & practical advice',
+         };
+         prompt += `- Support Style: ${supportMap[preferences.supportTone]}\n`;
+       }
+       prompt += `\n`;
+     }
 
-    
+     // Context
+     if (Object.keys(context).length) {
+       prompt += `**Inner Weather & Current State:**\n`;
+       if (context.innerStirring) prompt += `- What's stirring inside: ${context.innerStirring}\n`;
+       if (context.heartState) prompt += `- Heart state today: ${context.heartState}\n`;
+       if (context.seekingClarity) prompt += `- Seeking clarity on: ${context.seekingClarity}\n`;
+       if (context.loveInterestSign) prompt += `- Love interest's sign: ${context.loveInterestSign}\n`;
+       if (context.inFlux) prompt += `- Most in flux: ${context.inFlux}\n`;
+       if (context.avoidingTruth) prompt += `- Truth being avoided: ${context.avoidingTruth}\n`;
+       if (context.seasonWish) prompt += `- Wish for this season: ${context.seasonWish}\n`;
+       prompt += `\n`;
+     }
 
+     // Data‑richness instruction
+     prompt += `**Data Richness Level: ${dataRichness.level}/16 (${dataRichness.percentage}%)**\n`;
+     prompt += `Tailor the depth and personalization of your reading to match this data level. `;
 
+     if (dataRichness.level <= 2) {
+       prompt += `With basic info, focus on general zodiac themes but make them feel personal.`;
+     } else if (dataRichness.level <= 5) {
+       prompt += `With moderate data, weave in their preferences and relationship status for relevance.`;
+     } else if (dataRichness.level <= 8) {
+       prompt += `With rich data, incorporate birth time details, current location influences, and their specific archetype.`;
+     } else {
+       prompt += `With maximum data, create a deeply personalized reading that addresses their specific goals, uses their preferred
+   style, and incorporates all astrological details.`;
+     }
 
+     prompt += `\n\nGenerate a horoscope that feels specifically written for this person. Match their cosmic depth preference, guide
+   style, and support tone. Address what they're seeking clarity on and what's stirring inside them. Be insightful, authentic, and avoid
+   generic advice. Use their preferred communication style from the guide vibe selection.`;
 
+     return prompt;
+   }
 
+   // ---- Export for Vercel & tests ----
+   module.exports = app;
+   module.exports.buildPrompt = buildPrompt;
 
+   // ---- Claude call with timeout ----
+   async function generateHoroscope(userData) {
+     const prompt = buildPrompt(userData);
+     const controller = new AbortController();
+     const timeout = setTimeout(() => controller.abort(), 15000); // 15 s
+     try {
+       const response = await fetch('https://api.anthropic.com/v1/messages', {
+         method: 'POST',
+         signal: controller.signal,
+         headers: {
+           'Content-Type': 'application/json',
+           'X-API-Key': process.env.CLAUDE_API_KEY,
+           'anthropic-version': '2023-06-01',
+         },
+         body: JSON.stringify({
+           model: 'claude-3-5-sonnet-latest',
+           max_tokens: 1000,
+           messages: [{ role: 'user', content: prompt }],
+         }),
+       });
+       if (!response.ok) {
+         throw new Error(`Claude API error: ${response.status}`);
+       }
+       const data = await response.json();
+       return data.content[0].text;
+     } finally {
+       clearTimeout(timeout);
+     }
+   }
 
+   // ---- Routes ----
+   app.post('/api/generate-horoscope', async (req, res) => {
+     try {
+       const userData = req.body;
+       if (!userData.required?.zodiacSign) {
+         return res.status(400).json({ error: 'Zodiac sign is required' });
+       }
 
-function buildPrompt(userData) {
+       // ---- Sanitisation ----
+       const sanitizeObject = (obj) => {
+         if (!obj || typeof obj !== 'object') return {};
+         const out = {};
+         for (const [k, v] of Object.entries(obj)) {
+           out[k] = typeof v === 'string' ? sanitize(v) : v;
+         }
+         return out;
+       };
+       userData.required = sanitizeObject(userData.required);
+       userData.optional = sanitizeObject(userData.optional);
+       userData.preferences = sanitizeObject(userData.preferences);
+       userData.context = sanitizeObject(userData.context);
+       if (userData.dataRichness) {
+         userData.dataRichness.level = Number(userData.dataRichness.level) || 0;
+         userData.dataRichness.percentage = Number(userData.dataRichness.percentage) || 0;
+       }
 
+       console.log(
+         `Generating horoscope for ${userData.required.zodiacSign} (Data Level: ${
+           userData.dataRichness?.level ?? 'N/A'
+         }/16)`
+       );
 
-    const { dataRichness, required, optional, preferences, context } = userData;
-    
-    // Base prompt structure
-    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    let prompt = `You are a skilled astrologer creating a personalized horoscope for today, ${today}. Here's what you know about this person:\n\n`;
-    
-    // Required info
-    prompt += `**Core Info:**\n`;
-    prompt += `- Date of Birth: ${required.dateOfBirth}\n`;
-    prompt += `- Zodiac Sign: ${required.zodiacSign}\n\n`;
-    
-    // Optional astrological data
-    if (Object.keys(optional).length > 0) {
-        prompt += `**Cosmic Blueprint Details:**\n`;
-        if (optional.birthTime) prompt += `- Birth Time Knowledge: ${optional.birthTime}\n`;
-        if (optional.birthLocation) prompt += `- Birth Location: ${optional.birthLocation}\n`;
-        if (optional.currentLocation) prompt += `- Current Location: ${optional.currentLocation}\n`;
-        if (optional.genderIdentity) prompt += `- Gender Identity: ${optional.genderIdentity}\n`;
-        prompt += `\n`;
-    }
-    
-    // Guide and tone preferences
-    if (Object.keys(preferences).length > 0) {
-        prompt += `**Guide & Tone Preferences:**\n`;
-        if (preferences.cosmicDepth) {
-            const depthMap = {
-                'light': 'Keep it light and uplifting ✨',
-                'truth': 'Hit me with the truth, no sugar-coating 🔥',
-                'shadows': 'Show me the shadows and deeper work 🖤'
-            };
-            prompt += `- Depth Level: ${depthMap[preferences.cosmicDepth]}\n`;
-        }
-        if (preferences.guideVibe) {
-            const guideMap = {
-                'nurturing': 'Nurturing & gentle approach',
-                'intuitive': 'Intuitive & poetic language',
-                'playful': 'Playful & bold energy',
-                'direct': 'Clear & direct communication',
-                'cosmic-clown': 'Meme-ified & cosmic clown humor',
-                'surprise': 'Surprise me with your style'
-            };
-            prompt += `- Guide Style: ${guideMap[preferences.guideVibe]}\n`;
-        }
-        if (preferences.supportTone) {
-            const supportMap = {
-                'affirming': 'Affirming & soft support',
-                'tough-love': 'Truthful & tough love',
-                'spiritual': 'Spiritual & symbolic guidance',
-                'practical': 'Grounded & practical advice'
-            };
-            prompt += `- Support Style: ${supportMap[preferences.supportTone]}\n`;
-        }
-        prompt += `\n`;
-    }
-    
-    // Inner weather and emotional context
-    if (Object.keys(context).length > 0) {
-        prompt += `**Inner Weather & Current State:**\n`;
-        if (context.innerStirring) prompt += `- What's stirring inside: ${context.innerStirring}\n`;
-        if (context.heartState) prompt += `- Heart state today: ${context.heartState}\n`;
-        if (context.seekingClarity) prompt += `- Seeking clarity on: ${context.seekingClarity}\n`;
-        if (context.loveInterestSign) prompt += `- Love interest's sign: ${context.loveInterestSign}\n`;
-        if (context.inFlux) prompt += `- Most in flux: ${context.inFlux}\n`;
-        if (context.avoidingTruth) prompt += `- Truth being avoided: ${context.avoidingTruth}\n`;
-        if (context.seasonWish) prompt += `- Wish for this season: ${context.seasonWish}\n`;
-        prompt += `\n`;
-    }
-    
-    // Data richness instruction
-    prompt += `**Data Richness Level: ${dataRichness.level}/16 (${dataRichness.percentage}%)**\n`;
-    prompt += `Tailor the depth and personalization of your reading to match this data level. `;
-    
-    if (dataRichness.level <= 2) {
-        prompt += `With basic info, focus on general zodiac themes but make them feel personal.`;
-    } else if (dataRichness.level <= 5) {
-        prompt += `With moderate data, weave in their preferences and relationship status for relevance.`;
-    } else if (dataRichness.level <= 8) {
-        prompt += `With rich data, incorporate birth time details, current location influences, and their specific archetype.`;
-    } else {
-        prompt += `With maximum data, create a deeply personalized reading that addresses their specific goals, uses their preferred style, and incorporates all astrological details.`;
-    }
-    
-    prompt += `\n\nGenerate a horoscope that feels specifically written for this person. Match their cosmic depth preference, guide style, and support tone. Address what they're seeking clarity on and what's stirring inside them. Be insightful, authentic, and avoid generic advice. Use their preferred communication style from the guide vibe selection.`;
-    
-    return prompt;
-}
+       const horoscope = await generateHoroscope(userData);
+       res.json({
+         success: true,
+         horoscope,
+         dataLevel: userData.dataRichness?.level,
+         zodiacSign: userData.required.zodiacSign,
+         generatedAt: new Date().toISOString(),
+       });
+     } catch (err) {
+       console.error('Error generating horoscope:', err);
+       res.status(500).json({ success: false, error: 'Failed to generate horoscope', message: err.message });
+     }
+   });
 
-module.exports = { buildPrompt };
+   app.get('/api/health', (req, res) => {
+     res.json({ status: 'ok', timestamp: new Date().toISOString(), claude_api_configured: !!process.env.CLAUDE_API_KEY });
+   });
 
-// API Routes
-app.post('/api/generate-horoscope', async (req, res) => {
-    try {
-        const userData = req.body;
-        
-        // ---- Validation ----
-        if (!userData.required?.zodiacSign) {
-            return res.status(400).json({ 
-                error: 'Zodiac sign is required' 
-            });
-        }
-        
-        // ---- Sanitization ----
-        // Helper to deep‑sanitize known objects
-        const sanitizeObject = (obj) => {
-            if (!obj || typeof obj !== 'object') return {};
-            const sanitized = {};
-            for (const [k, v] of Object.entries(obj)) {
-                sanitized[k] = typeof v === 'string' ? sanitize(v) : v;
-            }
-            return sanitized;
-        };
-        userData.required = sanitizeObject(userData.required);
-        userData.optional = sanitizeObject(userData.optional);
-        userData.preferences = sanitizeObject(userData.preferences);
-        userData.context = sanitizeObject(userData.context);
-        if (userData.dataRichness) {
-            // keep numeric fields as‑is, but ensure they exist
-            userData.dataRichness.level = Number(userData.dataRichness.level) || 0;
-            userData.dataRichness.percentage = Number(userData.dataRichness.percentage) || 0;
-        }
-        
-        console.log(`Generating horoscope for ${userData.required.zodiacSign} (Data Level: ${userData.dataRichness?.level ?? 'N/A'}/16)`);
-        
-        const horoscope = await generateHoroscope(userData);
-        
-        res.json({
-            success: true,
-            horoscope: horoscope,
-            dataLevel: userData.dataRichness?.level,
-            zodiacSign: userData.required.zodiacSign,
-            generatedAt: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('Error generating horoscope:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to generate horoscope',
-            message: error.message
-        });
-    }
-});
+   app.get('/', (req, res) => {
+     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+   });
 
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        timestamp: new Date().toISOString(),
-        claude_api_configured: !!process.env.CLAUDE_API_KEY
-    });
-});
-
-// Serve the sacred geometry interface
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log(`🌟 Horoscope server running on http://localhost:${PORT}`);
-    console.log(`Claude API configured: ${!!process.env.CLAUDE_API_KEY}`);
-    
-    if (!process.env.CLAUDE_API_KEY) {
-        console.log('⚠️  Warning: CLAUDE_API_KEY not found in environment variables');
-        console.log('   Please add your Claude API key to the .env file');
-    }
-});
+   // ---- Run locally (ignored by Vercel) ----
+   if (require.main === module) {
+     app.listen(PORT, () => {
+       console.log(`🌟 Horoscope server running on http://localhost:${PORT}`);
+       console.log(`Claude API configured: ${!!process.env.CLAUDE_API_KEY}`);
+       if (!process.env.CLAUDE_API_KEY) {
+         console.log('⚠️  Warning: CLAUDE_API_KEY not found in environment variables');
+         console.log('   Please add your Claude API key to the .env file');
+       }
+     });
+   }
