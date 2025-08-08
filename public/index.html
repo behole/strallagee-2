@@ -1123,12 +1123,66 @@
             };
         }
 
-        // Share functions
+        // URL validation function
+        function isValidUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                // Only allow http and https protocols
+                return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Safe window.open function with validation
+        function safeWindowOpen(url, target = '_blank') {
+            if (!isValidUrl(url)) {
+                console.error('Invalid URL blocked:', url);
+                alert('Invalid URL detected. Action blocked for security.');
+                return;
+            }
+            
+            // Additional validation for known social media domains
+            const allowedDomains = [
+                'twitter.com',
+                'facebook.com',
+                'www.facebook.com',
+                'instagram.com',
+                'www.instagram.com'
+            ];
+            
+            try {
+                const urlObj = new URL(url);
+                const isAllowedDomain = allowedDomains.some(domain => 
+                    urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+                );
+                
+                if (url.startsWith('mailto:') || isAllowedDomain || urlObj.origin === window.location.origin) {
+                    window.open(url, target);
+                } else {
+                    console.error('Domain not allowed:', urlObj.hostname);
+                    alert('Domain not allowed for security reasons.');
+                }
+            } catch (e) {
+                console.error('URL validation error:', e);
+                alert('Invalid URL format.');
+            }
+        }
+
+        // Share functions with enhanced security
         function shareToEmail() {
             const subject = "My Cosmic Reading";
-            const body = document.querySelector('.sidebar div').textContent;
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.open(mailtoLink);
+            const sidebarContent = document.querySelector('.sidebar div');
+            if (!sidebarContent) {
+                alert('No reading content found to share.');
+                return;
+            }
+            
+            const body = sidebarContent.textContent || '';
+            // Limit body length to prevent extremely long URLs
+            const truncatedBody = body.length > 1000 ? body.substring(0, 1000) + '...' : body;
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(truncatedBody)}`;
+            safeWindowOpen(mailtoLink);
         }
 
         function shareToInstagram() {
@@ -1139,15 +1193,31 @@
 
         function shareToTwitter() {
             const text = "Just got my personalized cosmic reading! ✨🔮";
-            const url = window.location.href;
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-            window.open(twitterUrl, '_blank');
+            const currentUrl = window.location.href;
+            
+            // Validate current URL before using it
+            if (!isValidUrl(currentUrl)) {
+                console.error('Invalid current URL:', currentUrl);
+                alert('Unable to share: Invalid page URL.');
+                return;
+            }
+            
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(currentUrl)}`;
+            safeWindowOpen(twitterUrl);
         }
 
         function shareToFacebook() {
-            const url = window.location.href;
-            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-            window.open(facebookUrl, '_blank');
+            const currentUrl = window.location.href;
+            
+            // Validate current URL before using it
+            if (!isValidUrl(currentUrl)) {
+                console.error('Invalid current URL:', currentUrl);
+                alert('Unable to share: Invalid page URL.');
+                return;
+            }
+            
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+            safeWindowOpen(facebookUrl);
         }
 
         function copyToClipboard() {
@@ -1252,6 +1322,7 @@
     </script>
 </body>
 </html>
+
 
 
 
