@@ -4,7 +4,7 @@
   "description": "Proof of concept for data-driven horoscope generation using Claude API",
   "main": "server.js",
   "scripts": {
-    "test": "node test/**/*.js",
+    "test": "node test/buildPrompt.test.js",
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "echo 'No build step required'",
