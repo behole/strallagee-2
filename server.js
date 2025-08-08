@@ -7,46 +7,88 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Early exit if Claude API key is missing
+if (!process.env.CLAUDE_API_KEY) {
+  console.error('❌  CLAUDE_API_KEY is not defined. Please add it to .env and restart.');
+  process.exit(1);
+}
+
 // Middleware
-app.use(cors());
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? ['https://your-production-domain.com'] // TODO: replace with real domain(s)
+  : ['http://localhost:3000'];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow non‑browser tools (e.g., curl, postman) with no origin header
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'), false);
+    },
+  })
+);
+
 app.use(express.json());
 app.use(express.static('public')); // Serve your HTML file from public folder
 
 // Claude API integration
-async function generateHoroscope(userData) {
-    const prompt = buildPrompt(userData);
-    
-    try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': process.env.CLAUDE_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-5-sonnet-latest',
-                max_tokens: 1000,
-                messages: [{
-                    role: 'user',
-                    content: prompt
-                }]
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Claude API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.content[0].text;
-    } catch (error) {
-        console.error('Error calling Claude API:', error);
-        throw error;
-    }
+// Simple sanitiser – removes line breaks and trims whitespace
+function sanitize(value) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\r\n]+/g, ' ').trim();
 }
 
+// Generate horoscope with timeout handling
+async function generateHoroscope(userData) {
+  const prompt = buildPrompt(userData);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000); // 15 seconds
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-latest',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Claude API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (error) {
+    console.error('Error calling Claude API:', error);
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+
+    
+
+
+
+
+
+
+
+
 function buildPrompt(userData) {
+
+
     const { dataRichness, required, optional, preferences, context } = userData;
     
     // Base prompt structure
@@ -134,26 +176,48 @@ function buildPrompt(userData) {
     return prompt;
 }
 
+module.exports = { buildPrompt };
+
 // API Routes
 app.post('/api/generate-horoscope', async (req, res) => {
     try {
         const userData = req.body;
         
-        // Validate required data
+        // ---- Validation ----
         if (!userData.required?.zodiacSign) {
             return res.status(400).json({ 
                 error: 'Zodiac sign is required' 
             });
         }
         
-        console.log(`Generating horoscope for ${userData.required.zodiacSign} (Data Level: ${userData.dataRichness.level}/12)`);
+        // ---- Sanitization ----
+        // Helper to deep‑sanitize known objects
+        const sanitizeObject = (obj) => {
+            if (!obj || typeof obj !== 'object') return {};
+            const sanitized = {};
+            for (const [k, v] of Object.entries(obj)) {
+                sanitized[k] = typeof v === 'string' ? sanitize(v) : v;
+            }
+            return sanitized;
+        };
+        userData.required = sanitizeObject(userData.required);
+        userData.optional = sanitizeObject(userData.optional);
+        userData.preferences = sanitizeObject(userData.preferences);
+        userData.context = sanitizeObject(userData.context);
+        if (userData.dataRichness) {
+            // keep numeric fields as‑is, but ensure they exist
+            userData.dataRichness.level = Number(userData.dataRichness.level) || 0;
+            userData.dataRichness.percentage = Number(userData.dataRichness.percentage) || 0;
+        }
+        
+        console.log(`Generating horoscope for ${userData.required.zodiacSign} (Data Level: ${userData.dataRichness?.level ?? 'N/A'}/16)`);
         
         const horoscope = await generateHoroscope(userData);
         
         res.json({
             success: true,
             horoscope: horoscope,
-            dataLevel: userData.dataRichness.level,
+            dataLevel: userData.dataRichness?.level,
             zodiacSign: userData.required.zodiacSign,
             generatedAt: new Date().toISOString()
         });
@@ -167,6 +231,7 @@ app.post('/api/generate-horoscope', async (req, res) => {
         });
     }
 });
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
