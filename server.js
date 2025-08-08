@@ -29,6 +29,27 @@ const app = express();
    );
 
    app.use(express.json());
+   
+   // Content Security Policy headers to prevent XSS attacks
+   app.use((req, res, next) => {
+     res.setHeader('Content-Security-Policy', 
+       "default-src 'self'; " +
+       "script-src 'self' 'unsafe-inline'; " + // Allow inline scripts for now (will be removed in next task)
+       "style-src 'self' 'unsafe-inline'; " +  // Allow inline styles for now (will be removed in next task)
+       "img-src 'self' data: https:; " +
+       "font-src 'self' https://fonts.gstatic.com; " +
+       "connect-src 'self' https://api.anthropic.com; " +
+       "frame-ancestors 'none'; " +
+       "base-uri 'self'; " +
+       "form-action 'self';"
+     );
+     res.setHeader('X-Content-Type-Options', 'nosniff');
+     res.setHeader('X-Frame-Options', 'DENY');
+     res.setHeader('X-XSS-Protection', '1; mode=block');
+     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+     next();
+   });
+   
    app.use(express.static('public'));
 
    // ---- Simple sanitiser ----
